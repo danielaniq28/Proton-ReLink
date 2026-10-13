@@ -129,7 +129,7 @@ export function LoginScreen() {
             type="button"
             onClick={preview}
             disabled={pending != null}
-            className="mx-auto mt-4 block rounded-full border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-[11px] text-zinc-300 transition hover:bg-zinc-700 disabled:opacity-60"
+            className="mx-auto mt-4 hidden rounded-full border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-[11px] text-zinc-300 transition hover:bg-zinc-700 disabled:opacity-60"
           >
             {pending === "demo" ? "Opening preview…" : "Preview the cockpit"}
           </button>
