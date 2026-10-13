@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #08080a;
+  --accent: #d4af37;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(212, 175, 55, 0.35);
+}
+
+.liquid-nav {
+  position: relative;
+  border-radius: 999px;
+  background: rgba(18, 18, 20, 0.55);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  backdrop-filter: blur(22px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 28px rgba(0, 0, 0, 0.28);
+}
