@@ -1,0 +1,6 @@
+{
+  "name": "Proton Re-Link — Vehicle Command Centre",
+  "description": "Remote control and live status for your Proton vehicle.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

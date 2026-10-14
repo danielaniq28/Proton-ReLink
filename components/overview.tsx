@@ -58,8 +58,18 @@ export function Overview() {
             </div>
           </div>
         </div>
-        <motion.div layoutId="vehicle-photo" transition={{ type: "spring", stiffness: 260, damping: 32 }} className="mt-2">
-          <CarGraphic carType={vehicle.carType} imageUrl={vehicle.imageUrl} />
+        <motion.div
+          layoutId="vehicle-photo"
+          data-vehicle-photo
+          transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          className="mt-3 flex items-center justify-center py-2"
+        >
+          <CarGraphic
+            carType={vehicle.carType}
+            imageUrl={vehicle.imageUrl}
+            colorName={vehicle.colorName}
+            className="max-h-36 sm:max-h-48 md:max-h-56 w-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)]"
+          />
         </motion.div>
       </section>
 
@@ -68,32 +78,28 @@ export function Overview() {
         {modules.map((item, index) => {
           const Icon = item.icon;
           return (
-            <motion.a
+            <motion.button
               key={item.href}
-              href={item.href}
+              type="button"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, delay: 0.08 + index * 0.035 }}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={(event) => {
-                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                event.preventDefault();
-                go(item.href);
-              }}
-              className="group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-white/20 hover:bg-white/[0.06] cursor-pointer shadow-lg shadow-black/20"
+              onClick={() => go(item.href)}
+              className="group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left transition-all hover:border-white/20 hover:bg-white/[0.06] cursor-pointer shadow-lg shadow-black/20"
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-3 w-full">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white group-hover:bg-[#d4af37]/20 group-hover:text-[#d4af37] transition-colors">
                   <Icon className="h-5 w-5" />
                 </span>
                 <ChevronRight className="h-4 w-4 text-zinc-600 transition-transform group-hover:translate-x-1 group-hover:text-white" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 w-full">
                 <span className="block font-semibold text-white tracking-tight text-sm sm:text-base">{item.title}</span>
                 <span className="mt-0.5 block text-xs text-zinc-400 leading-tight truncate">{item.copy}</span>
               </div>
-            </motion.a>
+            </motion.button>
           );
         })}
       </section>

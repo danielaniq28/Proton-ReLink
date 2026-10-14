@@ -23,6 +23,10 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  openGraph: {
+    title: "Proton Re-Link — Vehicle Command Centre",
+    description: "Remote control and live status for your Proton vehicle.",
+  },
 };
 
 export const viewport: Viewport = {

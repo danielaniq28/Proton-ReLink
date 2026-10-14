@@ -73,8 +73,8 @@ export function ControlsView() {
   const actions = controlsFor(telemetry);
 
   return (
-    <div className="flex w-full flex-col gap-2.5 sm:gap-4">
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
+    <div className="flex w-full flex-1 flex-col justify-between min-h-0 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3 flex-1 auto-rows-fr min-h-0">
         {actions.map((item, index) => {
           const Icon = item.icon;
           const sending = pendingAction === item.action;
@@ -93,16 +93,16 @@ export function ControlsView() {
               whileHover={{ scale: 1.015, borderColor: "rgba(255,255,255,0.2)" }}
               disabled={pendingAction != null}
               onClick={() => void send(item.action)}
-              className="relative flex h-[4.35rem] sm:h-24 flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-2.5 sm:p-3.5 text-left text-white disabled:opacity-60 transition-colors"
+              className="relative flex h-full min-h-0 flex-col justify-between rounded-2xl sm:rounded-3xl border border-white/10 bg-white/[0.04] p-3 sm:p-4 text-left text-white disabled:opacity-60 transition-colors shadow-lg shadow-black/20"
             >
               <div className="flex w-full items-center justify-between">
-                <Icon className={`h-4.5 w-4.5 sm:h-5 sm:w-5 ${item.tone ? TONE[item.tone] : "text-zinc-400"}`} />
+                <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${item.tone ? TONE[item.tone] : "text-zinc-400"}`} />
                 {sending ? (
                   <span className="h-2 w-2 rounded-full bg-[#d4af37] animate-ping" />
                 ) : null}
               </div>
-              <div className="w-full min-w-0">
-                <div className="h-4 sm:h-5 overflow-hidden">
+              <div className="w-full min-w-0 mt-1 sm:mt-2">
+                <div className="overflow-hidden">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       key={item.label}
@@ -110,13 +110,13 @@ export function ControlsView() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.16 }}
-                      className="block truncate text-xs sm:text-sm font-semibold tracking-tight leading-tight"
+                      className="block truncate text-sm sm:text-base font-bold tracking-tight leading-tight"
                     >
                       {item.label}
                     </motion.span>
                   </AnimatePresence>
                 </div>
-                <span className="block truncate text-[10px] sm:text-xs text-zinc-400 leading-none mt-0.5">
+                <span className="block truncate text-xs sm:text-sm text-zinc-400 leading-normal mt-0.5">
                   {sending ? "Sending command…" : item.detail}
                 </span>
               </div>
@@ -129,7 +129,7 @@ export function ControlsView() {
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`rounded-2xl border px-3.5 py-2.5 text-xs sm:text-sm ${
+          className={`shrink-0 rounded-2xl border px-3 py-1.5 text-xs ${
             commandFailed
               ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
               : "border-white/10 bg-white/[0.04] text-zinc-300"

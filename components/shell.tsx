@@ -160,18 +160,18 @@ function MobileNav() {
                 }}
                 href={item.href}
                 onClick={(event) => {
+                  event.preventDefault();
                   if (suppressClick.current) {
                     suppressClick.current = false;
-                    event.preventDefault();
                     return;
                   }
-                  intercept(event, item.href, go);
+                  go(item.href);
                 }}
                 onPointerDown={() => {
                   if (dragRef.current?.moved) return;
                   setIndex(itemIndex);
                 }}
-                className={`relative z-20 flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full py-1.5 uppercase transition-colors ${active ? "text-white" : "text-zinc-400"}`}
+                className={`relative z-20 flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full py-1.5 uppercase transition-colors cursor-pointer ${active ? "text-white" : "text-zinc-400"}`}
               >
                 <Icon className="relative h-5 w-5 shrink-0" />
                 <span className={`relative block w-full text-center leading-none tracking-normal truncate px-0.5 ${fontSize}`}>
@@ -215,8 +215,8 @@ function Frame() {
         {signingOut ? <SignOutSplash key="signout-splash" /> : null}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-[#08080a] text-zinc-100">
-        <div className="flex min-h-screen w-full flex-col md:flex-row">
+      <div className={`min-h-screen bg-[#08080a] text-zinc-100 ${path === "/dashboard/controls" ? "h-dvh max-h-dvh overflow-hidden md:h-auto md:max-h-none md:overflow-visible" : ""}`}>
+        <div className={`flex min-h-screen w-full flex-col md:flex-row ${path === "/dashboard/controls" ? "h-dvh max-h-dvh md:h-auto md:max-h-none" : ""}`}>
           <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 py-6 md:flex">
             <img src="/da-mark.png" alt="Proton Re-Link" className="mb-10 h-auto w-[55%] max-w-[2.75rem] object-contain" />
             <nav className="flex w-full flex-1 flex-col items-center gap-2 px-1.5">
@@ -224,12 +224,11 @@ function Frame() {
                 const active = path === item.href;
                 const Icon = item.icon;
                 return (
-                  <a
+                  <button
                     key={item.href}
-                    href={item.href}
-                    onClick={(event) => intercept(event, item.href, go)}
-                    onPointerDown={() => go(item.href)}
-                    className={`relative flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-3 text-[10px] tracking-wide uppercase ${active ? "text-black" : "text-zinc-500 hover:text-white"}`}
+                    type="button"
+                    onClick={() => go(item.href)}
+                    className={`relative flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-3 text-[10px] tracking-wide uppercase cursor-pointer ${active ? "text-black" : "text-zinc-500 hover:text-white"}`}
                   >
                     {active ? (
                       <motion.span
@@ -241,7 +240,7 @@ function Frame() {
                     ) : null}
                     <Icon className="relative h-5 w-5" />
                     <span className="relative">{item.label}</span>
-                  </a>
+                  </button>
                 );
               })}
             </nav>
@@ -256,20 +255,27 @@ function Frame() {
             </button>
           </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="px-4 py-2.5 sm:py-4 sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] border-b border-white/5">
+        <div className="flex min-w-0 flex-1 flex-col h-full min-h-0">
+          <header className="shrink-0 px-4 py-2.5 sm:py-3.5 sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] border-b border-white/5">
             <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                {/* 1. Brand with 'Powered by' and da-mark.png */}
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">
                     Proton Re-Link
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-zinc-400">
-                    <span className={`h-1.5 w-1.5 rounded-full ${demo || warning ? "bg-[#d4af37]" : "bg-emerald-400"}`} />
-                    <span className="hidden sm:inline">{demo ? "Preview" : warning ? "Simulated" : "Live"}</span>
+                  <span className="text-[10px] sm:text-[11px] text-zinc-500 font-medium">
+                    Powered by
                   </span>
+                  <img
+                    src="/da-mark.png"
+                    alt="Powered by mark"
+                    className="h-3 sm:h-3.5 w-auto object-contain inline-block"
+                  />
                 </div>
-                <div className="mt-0.5 min-w-0">
+
+                {/* 2. Vehicle Model & Plate */}
+                <div className="mt-1 min-w-0">
                   {vehicles.length > 1 ? (
                     <>
                       <label className="sr-only" htmlFor="vehicle">
@@ -279,32 +285,41 @@ function Frame() {
                         id="vehicle"
                         value={vehicle?.vin ?? ""}
                         onChange={(event) => void selectVehicle(event.target.value)}
-                        className="w-full max-w-full truncate bg-transparent text-sm sm:text-lg font-semibold tracking-tight outline-none cursor-pointer"
+                        className="w-full max-w-full truncate bg-transparent text-base sm:text-xl font-bold tracking-tight text-white outline-none cursor-pointer"
                       >
                         {vehicles.map((item) => (
                           <option key={item.vin} value={item.vin} className="bg-[#111114]">
-                            {item.carType} {item.plate ? `· ${item.plate}` : ""}
+                            {item.carType} · {item.plate || item.vin}
                           </option>
                         ))}
                       </select>
                     </>
                   ) : (
-                    <p className="truncate text-sm sm:text-lg font-semibold tracking-tight">
-                      {vehicle ? `${vehicle.carType}${vehicle.plate ? ` · ${vehicle.plate}` : ""}` : "Vehicle"}
-                    </p>
+                    <h2 className="truncate text-base sm:text-xl font-bold tracking-tight text-white">
+                      {vehicle ? `${vehicle.carType} · ${vehicle.plate || vehicle.vin}` : "Proton"}
+                    </h2>
                   )}
+                </div>
+
+                {/* 3. Live / Preview status */}
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400">
+                  <span className={`h-2 w-2 rounded-full ${demo || warning ? "bg-[#d4af37]" : "bg-emerald-400"}`} />
+                  <span className="text-xs font-medium text-zinc-300">
+                    {demo ? "Preview" : warning ? "Simulated" : "Live"}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
+              {/* 4. Sign Out button (styled like reference screenshot) */}
+              <div className="flex shrink-0 items-center">
                 <button
                   type="button"
                   disabled={signingOut}
                   onClick={logout}
-                  className="flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-white/5 hover:text-white md:hidden cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-xs font-medium text-zinc-200 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="text-[11px]">{signingOut ? "Signing out…" : "Sign out"}</span>
+                  <LogOut className="h-4 w-4" />
+                  <span>{signingOut ? "Signing out…" : "Sign out"}</span>
                 </button>
               </div>
             </div>
@@ -318,8 +333,8 @@ function Frame() {
             </div>
           ) : null}
 
-          <div className="flex-1 px-4 pt-3 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
-            <div className="mx-auto w-full max-w-5xl">
+          <div className={`flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-2 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10 ${path === "/dashboard/controls" ? "overflow-hidden" : ""}`}>
+            <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               {stage && vehicle && telemetry ? <VehicleBanner vehicle={vehicle} telemetry={telemetry} label={path === "/dashboard/climate" ? "Climate" : "Controls"} /> : null}
               <DashboardPanels />
             </div>
