@@ -139,7 +139,7 @@ export function ClimatePanel({
                     key={m}
                     type="button"
                     onClick={() => onMinutes(m)}
-                    className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+                    className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
                       isSelected
                         ? "bg-white text-zinc-950 font-bold shadow-md shadow-white/10 ring-2 ring-white/50"
                         : "border border-white/[0.08] bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white"

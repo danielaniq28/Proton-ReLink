@@ -175,7 +175,7 @@ export function seedMockGarage(vehicles: Vehicle[]): Record<string, Telemetry> {
   return Object.fromEntries(vehicles.map((vehicle) => [vehicle.vin, mockTelemetry(vehicle)]));
 }
 
-export const CLIMATE_MINUTES = [5, 10, 15, 20, 30] as const;
+export const CLIMATE_MINUTES = [3, 5, 8, 10, 15, 20] as const;
 
 export function clampClimateMinutes(value: number): number {
   if (!Number.isFinite(value)) return 10;
