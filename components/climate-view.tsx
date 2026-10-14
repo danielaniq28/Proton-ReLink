@@ -18,8 +18,8 @@ export function ClimateView() {
       <div>
         <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-zinc-400">Climate</p>
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mt-0.5">Climate Control</h1>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          {vehicle.vehicleName || vehicle.modelName || vehicle.carType}
+        <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+          {vehicle.carType} · {vehicle.plate || vehicle.vin}
         </p>
       </div>
 

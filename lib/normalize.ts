@@ -40,6 +40,31 @@ function pickImage(record: Record<string, unknown>): string | null {
   return direct || null;
 }
 
+export function extractPlate(record: Record<string, unknown>): string {
+  const candidates = [
+    record.customPlateNo,
+    record.licensePlateNo,
+    record.plateNo,
+    record.userPlateNum,
+    record.plateNum,
+    record.licensePlate,
+    record.carPlate,
+    record.carPlateNo,
+    record.plate,
+    record.plateNumber,
+    record.carNo,
+    record.regNo,
+    record.numberPlate,
+  ];
+  for (const c of candidates) {
+    const val = str(c);
+    if (val && val !== "null" && val !== "undefined" && val !== "--") {
+      return val;
+    }
+  }
+  return "";
+}
+
 export function vehicleFromLegacy(raw: unknown): Vehicle | null {
   const record = asRecord(raw);
   if (!record) return null;
@@ -58,7 +83,7 @@ export function vehicleFromLegacy(raw: unknown): Vehicle | null {
     bodyColorCode: str(record.bodyColorCode) || str(record.colorCode),
     topColorCode: str(record.topColorCode),
     vehicleName: str(record.vehicleName) || modelName || seriesName,
-    plate: str(record.userPlateNum) || str(record.plateNum) || str(record.plateNo) || str(record.customPlateNo),
+    plate: extractPlate(record),
     colorName: str(record.userColorName) || str(record.colorName),
     imageUrl: pickImage(record),
     carType: extractCarType(modelName, seriesName, matName, str(record.modelCode), str(record.vehicleName)),
@@ -84,7 +109,7 @@ export function vehicleFromAtlas(raw: unknown): Vehicle | null {
     bodyColorCode: str(record.bodyColorCode),
     topColorCode: str(record.topColorCode),
     vehicleName: vehicleName || modelName,
-    plate: str(record.customPlateNo) || str(record.plateNo),
+    plate: extractPlate(record),
     colorName: str(record.bodyColorCode),
     imageUrl: pickImage(record),
     carType: extractCarType(modelName, vehicleName, matName, str(record.modelCode)),

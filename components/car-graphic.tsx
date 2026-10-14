@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
 
 type Props = {
   carType: string;
@@ -8,64 +8,32 @@ type Props = {
   className?: string;
   colorName?: string | null;
   engineOn?: boolean;
-  triggerKey?: number;
 };
 
-// Volumetric smoke plume billows expanding backwards and upwards from rear tyre contact patch
-const plumeBillows = [
-  // 1. Initial burst at tire contact patch
-  { id: "b1", x: 6, y: 0, dx: 28, dy: -16, r0: 10, r1: 34, delay: 0.0, dur: 1.6, op: 0.85 },
-  { id: "b2", x: 14, y: -4, dx: 42, dy: -26, r0: 12, r1: 42, delay: 0.08, dur: 1.7, op: 0.85 },
-  { id: "b3", x: 2, y: 2, dx: 36, dy: -20, r0: 11, r1: 38, delay: 0.16, dur: 1.7, op: 0.8 },
+export function CarGraphic({ carType, imageUrl, className, colorName }: Props) {
+  const [imageError, setImageError] = useState(false);
 
-  // 2. Rising lower plume expanding backwards behind tyre
-  { id: "b4", x: 20, y: -8, dx: 58, dy: -40, r0: 14, r1: 52, delay: 0.24, dur: 1.8, op: 0.9 },
-  { id: "b5", x: 10, y: -14, dx: 50, dy: -34, r0: 15, r1: 48, delay: 0.32, dur: 1.8, op: 0.85 },
-  { id: "b6", x: 26, y: -10, dx: 72, dy: -48, r0: 16, r1: 58, delay: 0.4, dur: 1.9, op: 0.9 },
-
-  // 3. Thick mid-plume billowing cloud
-  { id: "b7", x: 18, y: -20, dx: 78, dy: -58, r0: 18, r1: 64, delay: 0.48, dur: 2.0, op: 0.85 },
-  { id: "b8", x: 34, y: -16, dx: 92, dy: -66, r0: 20, r1: 68, delay: 0.58, dur: 2.0, op: 0.8 },
-  { id: "b9", x: 14, y: -26, dx: 68, dy: -52, r0: 16, r1: 60, delay: 0.68, dur: 1.9, op: 0.8 },
-
-  // 4. Upper plume curling upwards behind bumper
-  { id: "b10", x: 28, y: -30, dx: 106, dy: -78, r0: 22, r1: 75, delay: 0.78, dur: 2.1, op: 0.75 },
-  { id: "b11", x: 42, y: -24, dx: 120, dy: -84, r0: 24, r1: 80, delay: 0.88, dur: 2.1, op: 0.7 },
-  { id: "b12", x: 22, y: -36, dx: 96, dy: -88, r0: 20, r1: 72, delay: 0.98, dur: 2.2, op: 0.65 },
-
-  // 5. Late wisps trailing off into the atmosphere
-  { id: "b13", x: 38, y: -38, dx: 130, dy: -98, r0: 24, r1: 85, delay: 1.1, dur: 2.2, op: 0.55 },
-  { id: "b14", x: 50, y: -32, dx: 145, dy: -92, r0: 22, r1: 82, delay: 1.25, dur: 2.2, op: 0.5 },
-];
-
-const groundWisps = [
-  { id: "gw1", x: 18, dx: 58, rx0: 14, rx1: 52, ry: 5, delay: 0.05, dur: 1.5, op: 0.7 },
-  { id: "gw2", x: 32, dx: 86, rx0: 18, rx1: 72, ry: 6, delay: 0.25, dur: 1.8, op: 0.65 },
-  { id: "gw3", x: 46, dx: 118, rx0: 22, rx1: 90, ry: 7, delay: 0.5, dur: 2.0, op: 0.55 },
-];
-
-export function CarGraphic({ carType, imageUrl, className, colorName, engineOn = false, triggerKey = 1 }: Props) {
-  if (imageUrl) {
+  if (imageUrl && !imageError) {
     return (
-      <div className="relative">
-        <motion.img
-          key={`img-${triggerKey}`}
+      <div className="relative flex w-full items-center justify-center">
+        <img
           src={imageUrl}
           alt={`${carType} vehicle`}
-          animate={{
-            y: [0, -2.4, 2.0, -2.2, 1.8, -1.6, 1.4, -1.2, 1.0, -0.7, 0.5, -0.3, 0.2, 0],
-            rotate: [0, -0.32, 0.32, -0.26, 0.26, -0.18, 0.18, -0.12, 0.12, -0.06, 0.04, 0],
-          }}
-          transition={{ duration: 2.4, ease: "easeInOut" }}
+          onError={() => setImageError(true)}
           className={`mx-auto max-h-[280px] w-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] ${className ?? ""}`}
         />
       </div>
     );
   }
 
-  const isSedan = carType === "S70" || carType === "SAGA" || carType === "PERSONA";
-  const isS70 = carType === "S70";
-  const isX50 = carType === "X50";
+  const typeUpper = (carType || "").toUpperCase();
+  const isSedan =
+    typeUpper.includes("S70") ||
+    typeUpper.includes("SAGA") ||
+    typeUpper.includes("PERSONA") ||
+    typeUpper.includes("SEDAN");
+  const isS70 = typeUpper.includes("S70");
+  const isX50 = typeUpper.includes("X50");
   const isWhite = colorName?.toLowerCase().includes("white");
 
   // Colors tailored to Proton models (S70 Marine Blue as seen in reference screenshot)
@@ -83,6 +51,9 @@ export function CarGraphic({ carType, imageUrl, className, colorName, engineOn =
   return (
     <svg
       viewBox="0 0 680 240"
+      width="100%"
+      height="auto"
+      style={{ aspectRatio: "680 / 240" }}
       className={`mx-auto w-full max-w-[620px] select-none ${className ?? ""}`}
       role="img"
       aria-label={`${carType} preview graphic`}
@@ -137,96 +108,13 @@ export function CarGraphic({ carType, imageUrl, className, colorName, engineOn =
           <stop offset="100%" stopColor="#b91c1c" stopOpacity="0.2" />
         </linearGradient>
 
-        {/* Smoke Plume soft radial gradient */}
-        <radialGradient id="plume-puff-gradient" cx="45%" cy="45%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-          <stop offset="28%" stopColor="#f4f4f5" stopOpacity="0.75" />
-          <stop offset="58%" stopColor="#d4d4d8" stopOpacity="0.45" />
-          <stop offset="85%" stopColor="#a1a1aa" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#71717a" stopOpacity="0" />
-        </radialGradient>
-
-        {/* Volumetric blur filters for soft, cloud-like smoke plume */}
-        <filter id="plume-soft-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="6" />
-        </filter>
-        <filter id="plume-thick-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="9" />
-        </filter>
       </defs>
 
       {/* 1. Ground contact shadow under tires and chassis */}
       <ellipse cx="340" cy="192" rx="270" ry="18" fill="url(#car-ground-shadow)" />
 
-      {/* 2. Rear Tyre Smoke Plume (Billowing cloud behind and above rear tyre) */}
-      <g key={`smoke-plume-${triggerKey}`}>
-        {/* Ground rolling wisps */}
-        {groundWisps.map((w) => (
-          <motion.ellipse
-            key={w.id}
-            cx={rearX + w.x}
-            cy={194}
-            rx={w.rx0}
-            ry={w.ry}
-            fill="url(#plume-puff-gradient)"
-            filter="url(#plume-soft-blur)"
-            initial={{ opacity: 0, cx: rearX + w.x, rx: w.rx0 }}
-            animate={{
-              opacity: [0, w.op, w.op * 0.45, 0],
-              cx: rearX + w.x + w.dx,
-              rx: w.rx1,
-            }}
-            transition={{
-              duration: w.dur,
-              delay: w.delay,
-              ease: "easeOut",
-            }}
-          />
-        ))}
-
-        {/* Expanding volumetric smoke plume billows */}
-        {plumeBillows.map((p) => (
-          <motion.circle
-            key={p.id}
-            cx={rearX + p.x}
-            cy={rearY + p.y}
-            r={p.r0}
-            fill="url(#plume-puff-gradient)"
-            filter={p.r1 > 50 ? "url(#plume-thick-blur)" : "url(#plume-soft-blur)"}
-            initial={{
-              opacity: 0,
-              cx: rearX + p.x,
-              cy: rearY + p.y,
-              r: p.r0,
-            }}
-            animate={{
-              opacity: [0, p.op, p.op * 0.75, p.op * 0.3, 0],
-              cx: [rearX + p.x, rearX + p.x + p.dx * 0.5, rearX + p.x + p.dx],
-              cy: [rearY + p.y, rearY + p.y + p.dy * 0.55, rearY + p.y + p.dy],
-              r: [p.r0, p.r0 + (p.r1 - p.r0) * 0.55, p.r1],
-            }}
-            transition={{
-              duration: p.dur,
-              delay: p.delay,
-              ease: "easeOut",
-            }}
-          />
-        ))}
-      </g>
-
-      {/* 3. Main Vibrating Car Body & Wheels Assembly (Wheels are static, chassis vibrates) */}
-      <motion.g
-        key={`car-assembly-${triggerKey}`}
-        animate={{
-          y: [0, -2.5, 2.0, -2.2, 1.8, -1.6, 1.4, -1.2, 1.0, -0.7, 0.5, -0.3, 0.2, 0],
-          rotate: [0, -0.35, 0.35, -0.28, 0.28, -0.2, 0.2, -0.14, 0.14, -0.08, 0.04, 0],
-        }}
-        transition={{
-          duration: 2.4,
-          ease: "easeInOut",
-        }}
-        style={{ transformOrigin: "340px 180px" }}
-      >
+      {/* 2. Main Car Body & Wheels Assembly */}
+      <g>
         {isSedan ? (
           /* ================= PROTON S70 SEDAN PROFILE ================= */
           <g>
@@ -451,7 +339,7 @@ export function CarGraphic({ carType, imageUrl, className, colorName, engineOn =
           ))}
           <circle cx="0" cy="0" r="6" fill="#09090b" stroke="#d4af37" strokeWidth="1.5" />
         </g>
-      </motion.g>
+      </g>
     </svg>
   );
 }

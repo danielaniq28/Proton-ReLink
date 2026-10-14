@@ -131,7 +131,7 @@ export function ClimatePanel({
               <span className="font-medium text-white text-sm">Auto-off Timer</span>
               <p className="text-xs text-zinc-500 mt-0.5">Shuts down cabin A/C after preset runtime ({run} min)</p>
             </div>
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap">
               {CLIMATE_MINUTES.map((m) => {
                 const isSelected = run === m;
                 return (
@@ -139,7 +139,7 @@ export function ClimatePanel({
                     key={m}
                     type="button"
                     onClick={() => onMinutes(m)}
-                    className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+                    className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
                       isSelected
                         ? "bg-white text-zinc-950 font-bold shadow-md shadow-white/10 ring-2 ring-white/50"
                         : "border border-white/[0.08] bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white"

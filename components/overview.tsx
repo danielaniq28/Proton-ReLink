@@ -24,16 +24,6 @@ export function Overview() {
   const { vehicle, telemetry, loading } = useVehicle();
   const { go } = useDashboardNav();
   const [donate, setDonate] = useState(false);
-  const [triggerKey, setTriggerKey] = useState(1);
-  const [isTriggering, setIsTriggering] = useState(false);
-
-  function handleTriggerPlume() {
-    setTriggerKey((k) => k + 1);
-    setIsTriggering(true);
-    setTimeout(() => {
-      setIsTriggering(false);
-    }, 2400);
-  }
 
   if (loading || !vehicle || !telemetry) {
     return <div className="h-80 animate-pulse rounded-3xl bg-white/5" />;
@@ -93,7 +83,9 @@ export function Overview() {
           <div className="min-w-0">
             <p className="truncate text-[11px] tracking-[0.16em] text-zinc-400 uppercase font-semibold">{vehicle.colorName || "Proton"}</p>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white mt-0.5">{vehicle.carType}</h1>
-            <p className="mt-0.5 truncate text-xs sm:text-sm text-zinc-400">{vehicle.plate || vehicle.vin}</p>
+            <p className="mt-0.5 truncate text-xs sm:text-sm text-zinc-400">
+              {vehicle.plate || vehicle.vin}
+            </p>
           </div>
           <div className="relative shrink-0">
             <FuelArc percent={telemetry.fuelPercent} rangeKm={telemetry.rangeKm} />
@@ -111,22 +103,17 @@ export function Overview() {
             </div>
           </div>
         </div>
-        <div
-          onClick={handleTriggerPlume}
-          className="group relative mt-2 flex cursor-pointer flex-col items-center justify-center py-2 select-none"
-          title="Click to trigger smoke plume & vibration"
-        >
+        <div className="relative mt-2 flex w-full flex-col items-center justify-center py-2 select-none">
           <CarGraphic
             carType={vehicle.carType}
             imageUrl={vehicle.imageUrl}
             colorName={vehicle.colorName}
             engineOn={telemetry.engineOn}
-            triggerKey={triggerKey}
-            className="max-h-36 sm:max-h-48 md:max-h-56 w-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] transition-transform duration-200 group-hover:scale-[1.01] active:scale-[0.99]"
+            className="w-full max-w-[560px] h-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)]"
           />
         </div>
 
-        {/* Interior & Exterior Temperatures and Smoke Plume Trigger */}
+        {/* Interior & Exterior Temperatures */}
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
           <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
             <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Interior</span>
@@ -136,18 +123,6 @@ export function Overview() {
             <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Exterior</span>
             <span className="font-semibold text-white">{telemetry.exteriorTemp}°C</span>
           </div>
-          <button
-            type="button"
-            onClick={handleTriggerPlume}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 transition-all cursor-pointer active:scale-95 ${
-              isTriggering
-                ? "border-amber-400/50 bg-amber-500/20 text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.25)]"
-                : "border-white/[0.12] bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 hover:text-white"
-            }`}
-          >
-            <span className="text-xs">💨</span>
-            <span className="text-[11px] font-medium">{isTriggering ? "Revving..." : "Smoke Plume"}</span>
-          </button>
         </div>
 
         {/* Progress Bars: Service Schedule & Fuel Level */}

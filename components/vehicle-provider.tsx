@@ -41,6 +41,7 @@ type VehicleContextValue = {
   send: (action: ControlAction, temperature?: number, minutes?: number) => Promise<void>;
   setTargetTemp: (value: number) => void;
   setClimateMinutes: (value: number) => void;
+  updatePlate: (plate: string) => void;
 };
 
 const VehicleContext = createContext<VehicleContextValue | null>(null);
@@ -120,9 +121,19 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const data = (await response.json()) as GarageResponse;
-    setVehicles(data.vehicles);
+    const resolvedVehicles = data.vehicles.map((v) => {
+      let plate = v.plate;
+      if (!plate) {
+        try {
+          const stored = window.localStorage.getItem(`pl_plate_${v.vin}`);
+          if (stored) plate = stored;
+        } catch {}
+      }
+      return { ...v, plate };
+    });
+    setVehicles(resolvedVehicles);
     setDemo(data.demo);
-    const selected = data.vehicles.find((item) => item.vin === data.selectedVin) ?? data.vehicles[0] ?? null;
+    const selected = resolvedVehicles.find((item) => item.vin === data.selectedVin) ?? resolvedVehicles[0] ?? null;
     setVehicle(selected);
     setWarning(data.warning);
     setFallback(Boolean(data.fallback));
@@ -224,6 +235,20 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     if (vehicle) await loadStatus(vehicle.vin, vehicle.carType);
   }, [loadStatus, vehicle]);
 
+  const updatePlate = useCallback(
+    (newPlate: string) => {
+      if (!vehicle) return;
+      const trimmed = newPlate.trim().toUpperCase();
+      try {
+        window.localStorage.setItem(`pl_plate_${vehicle.vin}`, trimmed);
+      } catch {}
+      const updatedVehicle = { ...vehicle, plate: trimmed };
+      setVehicle(updatedVehicle);
+      setVehicles((curr) => curr.map((v) => (v.vin === vehicle.vin ? updatedVehicle : v)));
+    },
+    [vehicle],
+  );
+
   const value = useMemo<VehicleContextValue>(
     () => ({
       vehicles,
@@ -242,8 +267,9 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       send,
       setTargetTemp,
       setClimateMinutes,
+      updatePlate,
     }),
-    [commandAction, commandFailed, commandNote, demo, fallback, loading, pendingAction, refresh, selectVehicle, send, setClimateMinutes, setTargetTemp, telemetry, vehicle, vehicles, warning],
+    [commandAction, commandFailed, commandNote, demo, fallback, loading, pendingAction, refresh, selectVehicle, send, setClimateMinutes, setTargetTemp, telemetry, updatePlate, vehicle, vehicles, warning],
   );
 
   return <VehicleContext.Provider value={value}>{children}</VehicleContext.Provider>;

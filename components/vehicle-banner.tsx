@@ -54,9 +54,16 @@ export function VehicleBanner({
             </motion.p>
           </AnimatePresence>
         </div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mt-0.5">
-          {vehicle.carType}
-        </h1>
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight">
+            {vehicle.carType}
+          </h1>
+          {vehicle.plate ? (
+            <span className="inline-flex items-center rounded-md border border-white/20 bg-black/80 px-2 py-0.5 text-xs font-bold tracking-wider text-white font-mono shadow-sm">
+              {vehicle.plate}
+            </span>
+          ) : null}
+        </div>
         <div className="mt-0.5 text-xs text-zinc-400 flex items-center gap-1.5 flex-wrap">
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
@@ -87,7 +94,7 @@ export function VehicleBanner({
             carType={vehicle.carType}
             imageUrl={vehicle.imageUrl}
             colorName={vehicle.colorName}
-            className="max-h-16 sm:max-h-24 md:max-h-28 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]"
           />
         </motion.div>
       </div>

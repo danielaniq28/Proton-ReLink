@@ -185,6 +185,7 @@ export function ControlsView() {
           {actions.map((item, index) => {
             const Icon = item.icon;
             const sending = item.id === "windows" ? isWindowPending : pendingAction === item.action;
+            const isLastOdd = index === 4;
             return (
               <motion.button
                 key={item.id}
@@ -199,7 +200,11 @@ export function ControlsView() {
                 whileTap={{ scale: 0.98 }}
                 disabled={pendingAction != null}
                 onClick={() => handleAction(item)}
-                className="group relative flex min-h-[114px] sm:min-h-[128px] flex-col justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-left text-white transition-all hover:border-white/[0.16] hover:bg-white/[0.07] active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm"
+                className={`group relative flex min-h-[114px] sm:min-h-[128px] flex-col justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-left text-white transition-all hover:border-white/[0.16] hover:bg-white/[0.07] active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm ${
+                  isLastOdd
+                    ? "col-span-2 justify-self-center mx-auto w-full max-w-[calc(50%-5px)] sm:max-w-[calc(50%-7px)] lg:col-span-1 lg:max-w-none"
+                    : ""
+                }`}
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] text-zinc-200 transition-colors group-hover:bg-white/[0.12] group-hover:text-white">
