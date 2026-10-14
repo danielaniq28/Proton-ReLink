@@ -61,6 +61,22 @@ export function mockVehicles(): Vehicle[] {
       carType: "X50",
       isDefault: false,
     },
+    {
+      vin: "DEMOX90PROTON0004",
+      modelCode: "X90",
+      modelName: "X90",
+      seriesName: "X90",
+      matName: "X90 Flagship",
+      matCode: "",
+      bodyColorCode: "",
+      topColorCode: "",
+      vehicleName: "X90",
+      plate: "WA 9090",
+      colorName: "Deep Marine Blue",
+      imageUrl: null,
+      carType: "X90",
+      isDefault: false,
+    },
   ];
 }
 
@@ -104,6 +120,19 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "Subang Jaya, Selangor",
       interiorTemp: 22,
       exteriorTemp: 30,
+    },
+    X90: {
+      fuelPercent: 55,
+      efficiencyLPer100: 7.9,
+      rangeKm: 580,
+      odometerKm: 9400,
+      serviceKm: 6500,
+      serviceDays: 110,
+      latitude: 3.1612,
+      longitude: 101.7072,
+      place: "Ampang, Kuala Lumpur",
+      interiorTemp: 23,
+      exteriorTemp: 31,
     },
   };
   const profile = profiles[vehicle.carType] ?? profiles.X70;

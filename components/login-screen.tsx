@@ -85,7 +85,7 @@ export function LoginScreen() {
                   placeholder="01XXXXXXXX (e.g. 0195007428)"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-[#0e0e12] pl-12 pr-4 text-base sm:text-lg text-white placeholder:text-zinc-600 outline-none transition focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37]/40"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-[#0e0e12] pl-12 pr-4 text-base sm:text-lg text-white placeholder:text-zinc-600 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/10"
                 />
               </div>
             </div>
@@ -104,7 +104,7 @@ export function LoginScreen() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-[#0e0e12] pl-12 pr-12 text-base sm:text-lg text-white placeholder:text-zinc-600 outline-none transition focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37]/40"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-[#0e0e12] pl-12 pr-12 text-base sm:text-lg text-white placeholder:text-zinc-600 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/10"
                 />
                 <button
                   type="button"

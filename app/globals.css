@@ -2,7 +2,7 @@
 
 :root {
   --bg: #08080a;
-  --accent: #d4af37;
+  --accent: #f4f4f5;
   --text: #f4f4f5;
   --muted: #a1a1aa;
   color-scheme: dark;
@@ -23,7 +23,7 @@ body {
 
 body {
   margin: 0;
-  font-family: var(--font-sans), "Segoe UI", sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   padding-top: env(safe-area-inset-top, 0px);
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
@@ -35,7 +35,7 @@ input {
 }
 
 ::selection {
-  background: rgba(212, 175, 55, 0.35);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .liquid-nav {

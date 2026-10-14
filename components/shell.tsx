@@ -186,12 +186,68 @@ function MobileNav() {
   );
 }
 
+function CommandStatusFloating() {
+  const { commandNote, commandFailed, pendingAction } = useVehicle();
+  const [dismissed, setDismissed] = useState(false);
+  const prevNoteRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (commandNote && commandNote !== prevNoteRef.current) {
+      prevNoteRef.current = commandNote;
+      setDismissed(false);
+      const timer = setTimeout(() => {
+        setDismissed(true);
+      }, 5500);
+      return () => clearTimeout(timer);
+    }
+  }, [commandNote]);
+
+  const activeText = pendingAction ? "Executing command…" : commandNote;
+  const isVisible = Boolean(activeText && (!dismissed || pendingAction));
+
+  return (
+    <AnimatePresence>
+      {isVisible ? (
+        <motion.div
+          initial={{ opacity: 0, y: 14, scale: 0.94 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.94 }}
+          transition={{ type: "spring", stiffness: 450, damping: 30 }}
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
+        >
+          <div
+            onClick={() => setDismissed(true)}
+            className={`pointer-events-auto flex items-center justify-between gap-3 rounded-full border px-4 py-2 text-xs font-medium backdrop-blur-xl shadow-2xl transition-all cursor-pointer ${
+              commandFailed
+                ? "border-rose-500/25 bg-rose-950/90 text-rose-200 shadow-rose-950/40"
+                : "border-white/10 bg-zinc-900/90 text-zinc-200 shadow-black/50"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`h-2 w-2 rounded-full shrink-0 ${
+                  pendingAction
+                    ? "bg-white animate-pulse"
+                    : commandFailed
+                    ? "bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.5)]"
+                    : "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+                }`}
+              />
+              <span className="truncate">{activeText}</span>
+            </div>
+            <span className="text-[10px] text-zinc-400 hover:text-white ml-1">✕</span>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
 function Frame() {
   const router = useRouter();
   const { path, go } = useDashboardNav();
   const { vehicle, vehicles, telemetry, selectVehicle, demo, warning } = useVehicle();
   const [signingOut, setSigningOut] = useState(false);
-  const stage = path === "/dashboard/controls" || path === "/dashboard/climate";
 
   async function logout() {
     if (signingOut) return;
@@ -215,8 +271,8 @@ function Frame() {
         {signingOut ? <SignOutSplash key="signout-splash" /> : null}
       </AnimatePresence>
 
-      <div className={`min-h-screen bg-[#08080a] text-zinc-100 ${path === "/dashboard/controls" ? "h-dvh max-h-dvh overflow-hidden md:h-auto md:max-h-none md:overflow-visible" : ""}`}>
-        <div className={`flex min-h-screen w-full flex-col md:flex-row ${path === "/dashboard/controls" ? "h-dvh max-h-dvh md:h-auto md:max-h-none" : ""}`}>
+      <div className="min-h-screen bg-[#08080a] text-zinc-100">
+        <div className="flex min-h-screen w-full flex-col md:flex-row">
           <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 py-6 md:flex">
             <img src="/da-mark.png" alt="Proton Re-Link" className="mb-10 h-auto w-[55%] max-w-[2.75rem] object-contain" />
             <nav className="flex w-full flex-1 flex-col items-center gap-2 px-1.5">
@@ -248,20 +304,21 @@ function Frame() {
               type="button"
               disabled={signingOut}
               onClick={logout}
-              className="mx-1.5 flex w-[calc(100%-0.75rem)] flex-col items-center gap-1 rounded-2xl px-1 py-3 text-[10px] tracking-wide text-zinc-500 uppercase hover:bg-white/5 hover:text-white disabled:opacity-50 cursor-pointer"
+              aria-label="Sign out"
+              className="mx-1.5 flex w-[calc(100%-0.75rem)] flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] tracking-wide text-zinc-500 uppercase hover:bg-white/5 hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
             >
-              <LogOut className="h-5 w-5" />
-              Sign out
+              <LogOut className="h-4 w-4" />
+              <span>Sign out</span>
             </button>
           </aside>
 
         <div className="flex min-w-0 flex-1 flex-col h-full min-h-0">
-          <header className="shrink-0 px-4 py-2.5 sm:py-3.5 sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] border-b border-white/5">
+          <header className="shrink-0 px-4 py-2 sm:py-2.5 sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] border-b border-white/5">
             <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {/* 1. Brand with 'Powered by' and da-mark.png */}
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">
+                  <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] text-zinc-400 uppercase">
                     Proton Re-Link
                   </span>
                   <span className="text-[10px] sm:text-[11px] text-zinc-500 font-medium">
@@ -270,12 +327,12 @@ function Frame() {
                   <img
                     src="/da-mark.png"
                     alt="Powered by mark"
-                    className="h-3 sm:h-3.5 w-auto object-contain inline-block"
+                    className="h-3 sm:h-3.5 w-auto object-contain inline-block opacity-80"
                   />
                 </div>
 
                 {/* 2. Vehicle Model & Plate */}
-                <div className="mt-1 min-w-0">
+                <div className="mt-0.5 min-w-0">
                   {vehicles.length > 1 ? (
                     <>
                       <label className="sr-only" htmlFor="vehicle">
@@ -285,7 +342,7 @@ function Frame() {
                         id="vehicle"
                         value={vehicle?.vin ?? ""}
                         onChange={(event) => void selectVehicle(event.target.value)}
-                        className="w-full max-w-full truncate bg-transparent text-base sm:text-xl font-bold tracking-tight text-white outline-none cursor-pointer"
+                        className="w-full max-w-full truncate bg-transparent text-sm sm:text-base font-semibold tracking-tight text-white outline-none cursor-pointer"
                       >
                         {vehicles.map((item) => (
                           <option key={item.vin} value={item.vin} className="bg-[#111114]">
@@ -295,30 +352,31 @@ function Frame() {
                       </select>
                     </>
                   ) : (
-                    <h2 className="truncate text-base sm:text-xl font-bold tracking-tight text-white">
+                    <p className="truncate text-sm sm:text-base font-semibold tracking-tight text-white">
                       {vehicle ? `${vehicle.carType} · ${vehicle.plate || vehicle.vin}` : "Proton"}
-                    </h2>
+                    </p>
                   )}
                 </div>
 
                 {/* 3. Live / Preview status */}
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400">
-                  <span className={`h-2 w-2 rounded-full ${demo || warning ? "bg-[#d4af37]" : "bg-emerald-400"}`} />
-                  <span className="text-xs font-medium text-zinc-300">
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-400">
+                  <span className={`h-1.5 w-1.5 rounded-full ${demo || warning ? "bg-amber-400/80" : "bg-emerald-400"}`} />
+                  <span className="text-[11px] font-medium text-zinc-400">
                     {demo ? "Preview" : warning ? "Simulated" : "Live"}
                   </span>
                 </div>
               </div>
 
-              {/* 4. Sign Out button (styled like reference screenshot) */}
+              {/* 4. Compact Apple-style Sign Out button */}
               <div className="flex shrink-0 items-center">
                 <button
                   type="button"
                   disabled={signingOut}
                   onClick={logout}
-                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-xs font-medium text-zinc-200 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+                  aria-label="Sign out"
+                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-sm"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3 w-3 text-zinc-400" />
                   <span>{signingOut ? "Signing out…" : "Sign out"}</span>
                 </button>
               </div>
@@ -327,21 +385,21 @@ function Frame() {
 
           {warning ? (
             <div className="mx-auto w-full max-w-5xl px-4 sm:px-5 md:px-0">
-              <p className="mt-2 rounded-2xl border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-3 text-sm text-[#f3e2ae]">
+              <p className="mt-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs sm:text-sm text-amber-200/90">
                 {warning}
               </p>
             </div>
           ) : null}
 
-          <div className={`flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-2 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10 ${path === "/dashboard/controls" ? "overflow-hidden" : ""}`}>
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
-              {stage && vehicle && telemetry ? <VehicleBanner vehicle={vehicle} telemetry={telemetry} label={path === "/dashboard/climate" ? "Climate" : "Controls"} /> : null}
               <DashboardPanels />
             </div>
           </div>
         </div>
       </div>
 
+      <CommandStatusFloating />
       <MobileNav />
     </div>
     </LayoutGroup>

@@ -15,64 +15,78 @@ export function MapView() {
   const updated = formatDateTime(telemetry.updatedAt);
 
   return (
-    <div className="flex w-full flex-col gap-5">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs tracking-[0.2em] text-[#d4af37] uppercase font-medium">Find my car</p>
-          <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl text-white">{telemetry.place}</h1>
+    <div className="flex w-full flex-col gap-5 sm:gap-6">
+      {/* Consistent iOS Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-zinc-400">Location</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mt-0.5">Find My Car</h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            {telemetry.place || "Parked position"} · Updated {updated}
+          </p>
         </div>
-        <motion.button
+        <button
           type="button"
-          whileTap={{ scale: 0.95 }}
           onClick={() => void refresh()}
-          className="text-sm text-zinc-400 underline-offset-4 hover:text-white hover:underline cursor-pointer"
+          className="flex shrink-0 items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 transition-all hover:bg-white/[0.08] hover:text-white active:scale-95 cursor-pointer shadow-sm"
         >
           Refresh
-        </motion.button>
+        </button>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className="overflow-hidden rounded-[28px] border border-white/10"
-      >
-        <iframe title="Vehicle location" src={src} className="h-64 w-full sm:h-[420px] [filter:grayscale(1)_invert(0.92)_contrast(0.9)]" />
-      </motion.div>
+      {/* 1. Live Map Section */}
+      <div>
+        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-2.5 sm:mb-3">
+          Live Map
+        </h2>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.99 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+          className="overflow-hidden rounded-2xl sm:rounded-3xl border border-white/[0.08]"
+        >
+          <iframe title="Vehicle location" src={src} className="h-64 w-full sm:h-[400px] [filter:grayscale(1)_invert(0.92)_contrast(0.9)]" />
+        </motion.div>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        {[
-          { label: "Latitude", value: telemetry.latitude.toFixed(5) },
-          { label: "Longitude", value: telemetry.longitude.toFixed(5) },
-          { label: "Updated", value: updated },
-        ].map((item, index) => (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, delay: 0.08 + index * 0.035 }}
-            className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4"
-          >
-            <p className="text-[11px] tracking-widest text-zinc-500 uppercase">{item.label}</p>
-            <p className="mt-1 font-medium break-words text-white">{item.value}</p>
-          </motion.div>
-        ))}
-      </section>
+        <motion.a
+          href={maps}
+          target="_blank"
+          rel="noreferrer"
+          whileTap={{ scale: 0.98 }}
+          className="mt-3 flex h-12 w-full items-center justify-center rounded-2xl bg-white text-sm font-semibold text-black transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-sm cursor-pointer"
+        >
+          Open directions in Google Maps
+        </motion.a>
+      </div>
 
-      <motion.a
-        href={maps}
-        target="_blank"
-        rel="noreferrer"
-        whileTap={{ scale: 0.98 }}
-        whileHover={{ scale: 1.01 }}
-        className="flex h-12 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-black transition hover:bg-zinc-200"
-      >
-        Open directions in Google Maps
-      </motion.a>
+      {/* 2. Coordinates & Telemetry Section */}
+      <div>
+        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-2.5 sm:mb-3">
+          Coordinates & Telemetry
+        </h2>
+        <section className="grid gap-2.5 sm:gap-3.5 sm:grid-cols-3">
+          {[
+            { label: "Latitude", value: telemetry.latitude.toFixed(5) },
+            { label: "Longitude", value: telemetry.longitude.toFixed(5) },
+            { label: "Updated", value: updated },
+          ].map((item, index) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, delay: index * 0.03 }}
+              className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4"
+            >
+              <p className="text-[10px] sm:text-[11px] font-medium tracking-wider text-zinc-400 uppercase">{item.label}</p>
+              <p className="mt-1 font-semibold break-words text-white">{item.value}</p>
+            </motion.div>
+          ))}
+        </section>
 
-      <p className="text-sm text-zinc-500 text-center sm:text-left">
-        {vehicle.carType} · heading {Math.round(telemetry.heading)}° · speed {telemetry.speedKmh} km/h
-      </p>
+        <p className="mt-3 text-xs text-zinc-500 text-center sm:text-left">
+          {vehicle.carType} · heading {Math.round(telemetry.heading)}° · speed {telemetry.speedKmh} km/h
+        </p>
+      </div>
     </div>
   );
 }

@@ -14,6 +14,15 @@ export function ClimateView() {
 
   return (
     <div className="flex w-full flex-col gap-5 sm:gap-6">
+      {/* Consistent iOS Header */}
+      <div>
+        <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-zinc-400">Climate</p>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mt-0.5">Climate Control</h1>
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          {vehicle.vehicleName || vehicle.modelName || vehicle.carType}
+        </p>
+      </div>
+
       <ClimatePanel
         telemetry={{ ...telemetry, targetTemp: temperature }}
         minutes={minutes}

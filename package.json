@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
-    "build": "rm -rf .next && NODE_ENV=production next build",
+    "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit"
   },
