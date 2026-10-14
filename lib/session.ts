@@ -6,8 +6,8 @@ export const MOCK_COOKIE = "pl_mock";
 
 const base = {
   httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  sameSite: "none" as const,
+  secure: true,
   path: "/",
   maxAge: 60 * 60 * 12,
 };
@@ -39,6 +39,10 @@ export async function writeSession(session: Session) {
 
 export async function clearSession() {
   const jar = await cookies();
+  jar.set(SESSION_COOKIE, "", { ...base, maxAge: 0, expires: new Date(0) });
+  jar.set(SESSION_COOKIE, "", { path: "/", maxAge: 0, expires: new Date(0) });
+  jar.set(MOCK_COOKIE, "", { ...base, maxAge: 0, expires: new Date(0) });
+  jar.set(MOCK_COOKIE, "", { path: "/", maxAge: 0, expires: new Date(0) });
   jar.delete(SESSION_COOKIE);
   jar.delete(MOCK_COOKIE);
 }

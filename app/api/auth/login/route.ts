@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: true, demo: false });
   } catch (error) {
+    console.error("[Login Error]", error);
     const message = error instanceof ProtonError ? error.message : "Unable to reach Proton Connected Services";
     const status = error instanceof ProtonError ? error.status : 502;
     return NextResponse.json({ message }, { status: status === 401 ? 401 : 502 });

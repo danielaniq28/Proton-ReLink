@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ClimateView } from "./climate-view";
 import { ControlsView } from "./controls-view";
 import { useDashboardNav } from "./dashboard-nav";
@@ -18,20 +18,24 @@ const PANELS = [
 
 export function DashboardPanels() {
   const { path } = useDashboardNav();
-  const seen = useRef(new Set<string>([path]));
-  seen.current.add(path);
 
   return (
-    <>
+    <AnimatePresence mode="wait">
       {PANELS.map(({ href, View }) => {
-        if (!seen.current.has(href)) return null;
-        const active = href === path;
+        if (href !== path) return null;
         return (
-          <div key={href} className={active ? undefined : "hidden"} aria-hidden={!active}>
+          <motion.div
+            key={href}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full"
+          >
             <View />
-          </div>
+          </motion.div>
         );
       })}
-    </>
+    </AnimatePresence>
   );
 }

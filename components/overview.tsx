@@ -33,13 +33,14 @@ export function Overview() {
   const tone = rangeTone(telemetry.rangeKm);
 
   return (
-    <div className="flex w-full flex-col gap-4 sm:gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(17rem,24rem)] xl:items-start">
-      <section className="relative overflow-hidden rounded-[28px] border border-white/8 bg-gradient-to-b from-white/[0.05] to-transparent px-3 pt-5 pb-2 sm:px-4 sm:pt-6">
+    <div className="flex w-full flex-col gap-4 sm:gap-6">
+      {/* 1. TOP: Vehicle Hero Card with Range Arc and Car Photo */}
+      <section className="relative overflow-hidden rounded-[28px] border border-white/8 bg-gradient-to-b from-white/[0.05] to-transparent px-4 pt-5 pb-3 sm:px-6 sm:pt-6">
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="min-w-0">
-            <p className="truncate text-xs tracking-[0.2em] text-zinc-500 uppercase">{vehicle.colorName || "Proton"}</p>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{vehicle.carType}</h1>
-            <p className="mt-1 truncate text-sm text-zinc-400">{vehicle.plate || vehicle.vin}</p>
+            <p className="truncate text-xs tracking-[0.2em] text-[#d4af37] uppercase font-medium">{vehicle.colorName || "Proton"}</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-4xl text-white">{vehicle.carType}</h1>
+            <p className="mt-0.5 truncate text-xs sm:text-sm text-zinc-400">{vehicle.plate || vehicle.vin}</p>
           </div>
           <div className="relative shrink-0">
             <FuelArc percent={telemetry.fuelPercent} rangeKm={telemetry.rangeKm} />
@@ -57,16 +58,58 @@ export function Overview() {
             </div>
           </div>
         </div>
-        <motion.div layoutId="vehicle-photo" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
+        <motion.div layoutId="vehicle-photo" transition={{ type: "spring", stiffness: 260, damping: 32 }} className="mt-2">
           <CarGraphic carType={vehicle.carType} imageUrl={vehicle.imageUrl} />
         </motion.div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:col-start-1">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4">
+      {/* 2. MIDDLE: Remote Control, Climate, Car Status, Find My Car Buttons */}
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {modules.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <motion.a
+              key={item.href}
+              href={item.href}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, delay: 0.08 + index * 0.035 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                go(item.href);
+              }}
+              className="group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-white/20 hover:bg-white/[0.06] cursor-pointer shadow-lg shadow-black/20"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white group-hover:bg-[#d4af37]/20 group-hover:text-[#d4af37] transition-colors">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <ChevronRight className="h-4 w-4 text-zinc-600 transition-transform group-hover:translate-x-1 group-hover:text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="block font-semibold text-white tracking-tight text-sm sm:text-base">{item.title}</span>
+                <span className="mt-0.5 block text-xs text-zinc-400 leading-tight truncate">{item.copy}</span>
+              </div>
+            </motion.a>
+          );
+        })}
+      </section>
+
+      {/* 3. BOTTOM: Stats */}
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, delay: 0.16 + index * 0.03 }}
+            className="rounded-2xl border border-white/8 bg-white/[0.03] p-4"
+          >
             <p className="text-[11px] tracking-widest text-zinc-500 uppercase">{stat.label}</p>
-            <p className="mt-2 text-lg font-medium">
+            <p className="mt-1.5 text-lg font-semibold text-white">
               {stat.label === "Efficiency" ? (
                 <>
                   {telemetry.efficiencyLPer100.toFixed(1)}
@@ -76,43 +119,17 @@ export function Overview() {
                 stat.value
               )}
             </p>
-          </div>
+          </motion.div>
         ))}
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:grid-cols-1">
-        {modules.map((item) => {
-          const Icon = item.icon;
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              onClick={(event) => {
-                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                event.preventDefault();
-                go(item.href);
-              }}
-              className="group flex items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4 transition hover:bg-white/[0.06]"
-            >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8">
-                <Icon className="h-5 w-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-medium">{item.title}</span>
-                <span className="block text-sm text-zinc-500">{item.copy}</span>
-              </span>
-              <ChevronRight className="h-4 w-4 text-zinc-600 transition group-hover:translate-x-0.5" />
-            </a>
-          );
-        })}
-        <button
-          type="button"
-          onClick={() => setDonate(true)}
-          className="mx-auto text-xs text-zinc-500 transition hover:text-zinc-200"
-        >
-          Help improve this app ✨
-        </button>
-      </section>
+      <button
+        type="button"
+        onClick={() => setDonate(true)}
+        className="mx-auto text-xs text-zinc-500 transition hover:text-zinc-200 cursor-pointer pt-1"
+      >
+        Help improve this app ✨
+      </button>
 
       <AnimatePresence>
         {donate ? (
@@ -121,7 +138,7 @@ export function Overview() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 cursor-pointer"
             onClick={() => setDonate(false)}
           >
             <motion.img

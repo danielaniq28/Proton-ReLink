@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { formatNumber } from "@/lib/format";
 import { useVehicle } from "./vehicle-provider";
 
@@ -28,33 +29,45 @@ export function HealthView() {
   ];
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-5">
       <div>
-        <p className="text-xs tracking-[0.2em] text-zinc-500 uppercase">Health</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Tyres & Status</h1>
+        <p className="text-xs tracking-[0.2em] text-[#d4af37] uppercase font-medium">Health</p>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl text-white">Tyres & Status</h1>
       </div>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {corners.map((corner) => {
+        {corners.map((corner, index) => {
           const tire = telemetry.tires[corner.key];
           return (
-            <div key={corner.key} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
+            <motion.div
+              key={corner.key}
+              initial={{ opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.22, delay: index * 0.035, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ scale: 1.015 }}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4"
+            >
               <p className="text-[11px] tracking-widest text-zinc-500 uppercase">{corner.label}</p>
-              <p className={`mt-1 text-2xl font-semibold ${tire.warning ? "text-rose-300" : ""}`}>{tire.pressureKpa}</p>
+              <p className={`mt-1 text-2xl font-semibold ${tire.warning ? "text-rose-300" : "text-white"}`}>{tire.pressureKpa}</p>
               <p className="text-xs text-zinc-500">kPa</p>
-            </div>
+            </motion.div>
           );
         })}
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-white/8">
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.26, delay: 0.12 }}
+        className="overflow-hidden rounded-[24px] border border-white/8 bg-white/[0.02]"
+      >
         {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 border-b border-white/5 px-4 py-4 last:border-b-0 sm:px-5">
+          <div key={row.label} className="flex items-center justify-between gap-4 border-b border-white/5 px-4 py-3.5 last:border-b-0 sm:px-5">
             <span className="min-w-0 text-sm text-zinc-400">{row.label}</span>
-            <span className="shrink-0 text-right font-medium">{row.value}</span>
+            <span className="shrink-0 text-right font-medium text-white">{row.value}</span>
           </div>
         ))}
-      </section>
+      </motion.section>
     </div>
   );
 }

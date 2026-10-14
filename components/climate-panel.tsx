@@ -44,9 +44,21 @@ export function ClimatePanel({
         <button type="button" aria-label="Decrease temperature" disabled={temperature <= MIN_TEMP} onClick={() => onTemp(temperature - 1)} className="disabled:opacity-30">
           <ChevronLeft className="h-7 w-7" />
         </button>
-        <span className="relative block h-16 min-w-16 overflow-hidden text-center text-6xl font-light tracking-wide">
+        <span className="relative block h-16 min-w-16 overflow-hidden text-center text-6xl font-light tracking-wide [perspective:600px]">
           <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={temperature} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.18 }} className="block">
+            <motion.span
+              key={temperature}
+              initial={{ rotateX: -90, opacity: 0, y: -6 }}
+              animate={{ rotateX: 0, opacity: 1, y: 0 }}
+              exit={{ rotateX: 90, opacity: 0, y: 6 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                transformStyle: "preserve-3d",
+                backfaceVisibility: "hidden",
+                transformOrigin: "center center",
+              }}
+              className="block"
+            >
               {temperature}
             </motion.span>
           </AnimatePresence>

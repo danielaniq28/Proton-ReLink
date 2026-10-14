@@ -29,7 +29,7 @@ function controlsFor(telemetry: Telemetry): Array<{ id: string; action: ControlA
       id: "find",
       action: "horn",
       label: "Find car",
-      detail: "Horn and lights",
+      detail: "Horn & lights",
       icon: LocateFixed,
       tone: null,
     },
@@ -61,69 +61,83 @@ function controlsFor(telemetry: Telemetry): Array<{ id: string; action: ControlA
 }
 
 const TONE = {
-  ok: "text-[#b8e0c4]",
-  alert: "text-[#f2a3a0]",
+  ok: "text-emerald-400",
+  alert: "text-amber-400",
 } as const;
 
 export function ControlsView() {
   const { vehicle, telemetry, send, pendingAction, commandNote, commandFailed } = useVehicle();
 
-  if (!vehicle || !telemetry) return <div className="h-80 animate-pulse rounded-3xl bg-white/5" />;
+  if (!vehicle || !telemetry) return <div className="h-64 animate-pulse rounded-3xl bg-white/5" />;
 
   const actions = controlsFor(telemetry);
 
   return (
-    <div className="flex w-full flex-col gap-5">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        {actions.map((item) => {
+    <div className="flex w-full flex-col gap-2.5 sm:gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
+        {actions.map((item, index) => {
           const Icon = item.icon;
           const sending = pendingAction === item.action;
           return (
             <motion.button
               key={item.id}
               type="button"
-              layout
-              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                duration: 0.24,
+                delay: index * 0.035,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.015, borderColor: "rgba(255,255,255,0.2)" }}
               disabled={pendingAction != null}
               onClick={() => void send(item.action)}
-              className="relative flex min-h-24 flex-col items-start justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3 text-left text-white disabled:opacity-60 sm:px-4"
+              className="relative flex h-[4.35rem] sm:h-24 flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-2.5 sm:p-3.5 text-left text-white disabled:opacity-60 transition-colors"
             >
-              <Icon className="h-5 w-5" />
-              <span className="w-full">
-                <span className="block h-5 overflow-hidden">
+              <div className="flex w-full items-center justify-between">
+                <Icon className={`h-4.5 w-4.5 sm:h-5 sm:w-5 ${item.tone ? TONE[item.tone] : "text-zinc-400"}`} />
+                {sending ? (
+                  <span className="h-2 w-2 rounded-full bg-[#d4af37] animate-ping" />
+                ) : null}
+              </div>
+              <div className="w-full min-w-0">
+                <div className="h-4 sm:h-5 overflow-hidden">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       key={item.label}
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                      className="block text-sm font-medium"
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.16 }}
+                      className="block truncate text-xs sm:text-sm font-semibold tracking-tight leading-tight"
                     >
                       {item.label}
                     </motion.span>
                   </AnimatePresence>
+                </div>
+                <span className="block truncate text-[10px] sm:text-xs text-zinc-400 leading-none mt-0.5">
+                  {sending ? "Sending command…" : item.detail}
                 </span>
-                <span className={`block h-4 overflow-hidden text-xs ${item.tone ? TONE[item.tone] : "text-zinc-500"}`}>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span key={item.detail} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="block">
-                      {sending ? "Sending…" : item.detail}
-                    </motion.span>
-                  </AnimatePresence>
-                </span>
-              </span>
+              </div>
             </motion.button>
           );
         })}
       </div>
 
-      <AnimatePresence initial={false}>
-        {commandNote ? (
-          <motion.p key={commandFailed ? "fail" : "ok"} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className={`overflow-hidden text-sm ${commandFailed ? "text-rose-300" : "text-zinc-400"}`}>
-            {commandNote}
-          </motion.p>
-        ) : null}
-      </AnimatePresence>
+      {commandNote ? (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`rounded-2xl border px-3.5 py-2.5 text-xs sm:text-sm ${
+            commandFailed
+              ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+              : "border-white/10 bg-white/[0.04] text-zinc-300"
+          }`}
+        >
+          {commandNote}
+        </motion.div>
+      ) : null}
     </div>
   );
 }

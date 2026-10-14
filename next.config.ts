@@ -2,10 +2,10 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   poweredByHeader: false,
   devIndicators: false,
   images: { unoptimized: true },
-  outputFileTracingRoot: path.resolve(process.cwd()),
   async headers() {
     return [
       {
