@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Proton Re-Link",
-    statusBarStyle: "black",
+    statusBarStyle: "black-translucent",
   },
   icons: {
     icon: [

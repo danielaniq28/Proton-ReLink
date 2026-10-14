@@ -55,7 +55,7 @@ export function LoginScreen() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-[#08080a] px-4 py-10 text-zinc-100 sm:px-6">
+    <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-[#08080a] px-4 pt-[max(2.5rem,calc(env(safe-area-inset-top,0px)+1.5rem))] pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] text-zinc-100 sm:px-6">
       <div className="flex w-full max-w-[480px] flex-col items-center">
         {/* Header Branding */}
         <div className="mb-8 flex items-center gap-3">

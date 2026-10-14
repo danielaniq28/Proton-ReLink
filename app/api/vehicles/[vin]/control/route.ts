@@ -56,7 +56,18 @@ export async function POST(request: Request, { params }: Params) {
 
   try {
     const result = await sendCommand(session, vin, body.action, body.temperature, clampClimateMinutes(body.minutes ?? 10));
-    return NextResponse.json({ ok: true, applied: "live", result, message: "Command sent to the vehicle" });
+    const state = (await readMockState()) ?? {};
+    const current = state[vin] ?? mockTelemetry(vehicle);
+    const telemetry = applyMockCommand(current, body.action, body.temperature, body.minutes);
+    state[vin] = telemetry;
+    await writeMockState(state);
+    return NextResponse.json({
+      ok: true,
+      applied: "live",
+      result,
+      telemetry,
+      message: "Command sent to the vehicle",
+    });
   } catch (error) {
     const message = error instanceof ProtonError ? error.message : "Command failed";
     return NextResponse.json({ message }, { status: error instanceof ProtonError ? error.status : 502 });

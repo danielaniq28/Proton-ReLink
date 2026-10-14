@@ -2,7 +2,19 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ControlAction, Telemetry, Vehicle } from "@/lib/types";
-import { clampClimateMinutes } from "@/lib/mock";
+import { applyMockCommand, clampClimateMinutes } from "@/lib/mock";
+
+const BROADCAST_NAME = "proton_vehicle_channel";
+
+function broadcastTelemetry(telemetry: Telemetry) {
+  try {
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      const bc = new BroadcastChannel(BROADCAST_NAME);
+      bc.postMessage({ type: "TELEMETRY_SYNC", telemetry });
+      bc.close();
+    }
+  } catch {}
+}
 
 type GarageResponse = {
   vehicles: Vehicle[];
@@ -64,6 +76,7 @@ function writeCachedStatus(telemetry: Telemetry) {
     const parsed = raw ? (JSON.parse(raw) as Record<string, Telemetry>) : {};
     parsed[telemetry.vin] = telemetry;
     window.localStorage.setItem(STATUS_CACHE, JSON.stringify(parsed));
+    broadcastTelemetry(telemetry);
   } catch {
     /* private mode can block storage; the server still keeps the last status */
   }
@@ -89,6 +102,56 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   const [commandAction, setCommandAction] = useState<ControlAction | null>(null);
   const statusGeneration = useRef(0);
   const pendingRef = useRef<ControlAction | null>(null);
+  const verificationTimers = useRef<number[]>([]);
+
+  const clearVerificationTimers = useCallback(() => {
+    verificationTimers.current.forEach((id) => window.clearTimeout(id));
+    verificationTimers.current = [];
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearVerificationTimers();
+    };
+  }, [clearVerificationTimers]);
+
+  // Synchronize status across browser tabs and windows
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      if ("BroadcastChannel" in window) {
+        channel = new BroadcastChannel(BROADCAST_NAME);
+        channel.onmessage = (event) => {
+          const data = event.data;
+          if (data?.type === "TELEMETRY_SYNC" && data.telemetry) {
+            setTelemetry((current) => {
+              if (current && current.vin !== data.telemetry.vin) return current;
+              return data.telemetry;
+            });
+          }
+        };
+      }
+    } catch {}
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === STATUS_CACHE && event.newValue && vehicle) {
+        try {
+          const map = JSON.parse(event.newValue) as Record<string, Telemetry>;
+          if (map[vehicle.vin]) {
+            setTelemetry(map[vehicle.vin]);
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [vehicle]);
 
   const loadStatus = useCallback(async (vin: string, carType?: string) => {
     const generation = ++statusGeneration.current;
@@ -101,6 +164,9 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     }
     const data = (await response.json()) as StatusResponse;
     if (generation !== statusGeneration.current) return;
+    // Prevent in-flight optimistic command state from being clobbered by older polling packet
+    if (pendingRef.current) return;
+
     setTelemetry((current) => {
       if (!current || current.vin !== data.telemetry.vin) return data.telemetry;
       return {
@@ -150,12 +216,14 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   }, [loadGarage]);
 
   useEffect(() => {
-    if (!vehicle || demo || fallback) return;
+    if (!vehicle) return;
     const timer = window.setInterval(() => {
-      void loadStatus(vehicle.vin, vehicle.carType);
-    }, 20000);
+      if (document.visibilityState === "visible" && !pendingRef.current) {
+        void loadStatus(vehicle.vin, vehicle.carType);
+      }
+    }, 18000);
     return () => window.clearInterval(timer);
-  }, [vehicle, demo, fallback, loadStatus]);
+  }, [vehicle, loadStatus]);
 
   useEffect(() => {
     if (!vehicle) return;
@@ -190,13 +258,27 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   const send = useCallback(
     async (action: ControlAction, temperature?: number, minutes?: number) => {
       if (!vehicle) return;
+      clearVerificationTimers();
+
+      const previousTelemetry = telemetry;
+      // 1. Instant optimistic update so all tabs reflect the status immediately
+      if (telemetry) {
+        const optimistic = applyMockCommand(telemetry, action, temperature, minutes);
+        setTelemetry(optimistic);
+        writeCachedStatus(optimistic);
+      }
+
       pendingRef.current = action;
       setPendingAction(action);
       setCommandAction(action);
       setCommandNote(null);
       setCommandFailed(false);
+
+      const targetVin = vehicle.vin;
+      const targetCarType = vehicle.carType;
+
       try {
-        const response = await fetch(`/api/vehicles/${encodeURIComponent(vehicle.vin)}/control`, {
+        const response = await fetch(`/api/vehicles/${encodeURIComponent(targetVin)}/control`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action, temperature, minutes, fallback }),
@@ -207,10 +289,30 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
         if (data.telemetry) {
           setTelemetry(data.telemetry);
           writeCachedStatus(data.telemetry);
-        } else await loadStatus(vehicle.vin, vehicle.carType);
+        } else {
+          await loadStatus(targetVin, targetCarType);
+        }
         setCommandFailed(false);
         setCommandNote(data.message ?? "Command sent");
+
+        // 2. Multi-stage verification polling across all tabs
+        // Vehicle TCU processes commands over cellular connection; verifying in stages ensures the updated physical state is confirmed.
+        const t1 = window.setTimeout(() => {
+          void loadStatus(targetVin, targetCarType);
+        }, 1800);
+        const t2 = window.setTimeout(() => {
+          void loadStatus(targetVin, targetCarType);
+        }, 4500);
+        const t3 = window.setTimeout(() => {
+          void loadStatus(targetVin, targetCarType);
+        }, 8500);
+        verificationTimers.current = [t1, t2, t3];
       } catch (error) {
+        // Roll back on failure
+        if (previousTelemetry) {
+          setTelemetry(previousTelemetry);
+          writeCachedStatus(previousTelemetry);
+        }
         setCommandFailed(true);
         setCommandNote(error instanceof Error ? error.message : "Command failed");
       } finally {
@@ -218,7 +320,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
         setPendingAction(null);
       }
     },
-    [fallback, loadStatus, vehicle],
+    [clearVerificationTimers, fallback, loadStatus, telemetry, vehicle],
   );
 
   const setTargetTemp = useCallback((value: number) => {

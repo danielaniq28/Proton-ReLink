@@ -30,7 +30,7 @@ export function ConnectSplash() {
   const width = `${Math.round(progress * 100)}%`;
 
   return (
-    <main className="fixed inset-x-0 bottom-0 top-[env(safe-area-inset-top,0px)] z-50 flex flex-col items-center justify-center bg-[#08080a] px-6 text-zinc-100">
+    <main className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#08080a] px-6 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] text-zinc-100">
       <p className="text-sm tracking-[0.22em] text-zinc-400 uppercase">Connecting to</p>
       <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Proton Re-Link</h1>
       <div className="relative mt-10 h-24 w-72" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label="Connecting">

@@ -246,8 +246,19 @@ function CommandStatusFloating() {
 function Frame() {
   const router = useRouter();
   const { path, go } = useDashboardNav();
-  const { vehicle, vehicles, telemetry, selectVehicle, demo, warning } = useVehicle();
+  const { vehicle, vehicles, telemetry, selectVehicle, demo, warning, refresh } = useVehicle();
   const [signingOut, setSigningOut] = useState(false);
+
+  // Automatically refresh vehicle status when switching across tabs
+  const lastPathRef = useRef(path);
+  useEffect(() => {
+    if (lastPathRef.current !== path) {
+      lastPathRef.current = path;
+      if (vehicle) {
+        void refresh();
+      }
+    }
+  }, [path, vehicle, refresh]);
 
   async function logout() {
     if (signingOut) return;
@@ -273,7 +284,7 @@ function Frame() {
 
       <div className="min-h-screen bg-[#08080a] text-zinc-100">
         <div className="flex min-h-screen w-full flex-col md:flex-row">
-          <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 py-6 md:flex">
+          <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-6 md:flex">
             <img src="/da-mark.png" alt="Proton Re-Link" className="mb-10 h-auto w-[55%] max-w-[2.75rem] object-contain" />
             <nav className="flex w-full flex-1 flex-col items-center gap-2 px-1.5">
               {NAV.map((item) => {
@@ -313,7 +324,7 @@ function Frame() {
           </aside>
 
         <div className="flex min-w-0 flex-1 flex-col h-full min-h-0">
-          <header className="shrink-0 px-4 py-2 sm:py-2.5 sm:px-5 md:px-[clamp(1.25rem,3vw,2.5rem)] border-b border-white/5">
+          <header className="sticky top-0 z-30 shrink-0 border-b border-white/5 bg-[#08080a] px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-3 md:px-[clamp(1.25rem,3vw,2.5rem)] md:py-3.5">
             <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {/* 1. Brand with 'Powered by' and da-mark.png */}
