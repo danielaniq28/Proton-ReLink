@@ -138,7 +138,7 @@ export function mergeVehicles(primary: Vehicle[], extra: Vehicle[]): Vehicle[] {
   return [...map.values()];
 }
 
-const FUEL_TANKS: Record<string, number> = { S70: 50 };
+const FUEL_TANKS: Record<string, number> = { S70: 50, X70: 60, X50: 45, X90: 60, IRIZ: 40, PERSONA: 40, SAGA: 40 };
 
 function hatchOpen(value: unknown): boolean | null {
   const code = num(value);

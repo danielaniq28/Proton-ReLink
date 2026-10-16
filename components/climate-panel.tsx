@@ -8,6 +8,30 @@ import type { ControlAction, Telemetry } from "@/lib/types";
 const MIN_TEMP = 18;
 const MAX_TEMP = 31;
 
+function FlipDigit({ char }: { char: string }) {
+  return (
+    <div className="relative inline-flex h-20 w-8 shrink-0 items-center justify-center overflow-hidden [perspective:600px]">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={char}
+          initial={{ rotateX: -90, opacity: 0, y: -6 }}
+          animate={{ rotateX: 0, opacity: 1, y: 0 }}
+          exit={{ rotateX: 90, opacity: 0, y: 6 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden",
+            transformOrigin: "center center",
+          }}
+          className="absolute inset-0 flex items-center justify-center font-light tabular-nums"
+        >
+          {char}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function ClimatePanel({
   telemetry,
   minutes,
@@ -67,24 +91,9 @@ export function ClimatePanel({
             </button>
 
             {/* Strict Fixed Width Container to prevent any button shifting */}
-            <div className="relative flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden [perspective:600px]">
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div
-                  key={temperature}
-                  initial={{ rotateX: -90, opacity: 0, y: -6 }}
-                  animate={{ rotateX: 0, opacity: 1, y: 0 }}
-                  exit={{ rotateX: 90, opacity: 0, y: 6 }}
-                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                  style={{
-                    transformStyle: "preserve-3d",
-                    backfaceVisibility: "hidden",
-                    transformOrigin: "center center",
-                  }}
-                  className="absolute inset-0 flex items-center justify-center text-6xl font-light tracking-tight text-white tabular-nums select-none"
-                >
-                  {temperature}
-                </motion.div>
-              </AnimatePresence>
+            <div className="relative flex h-20 w-32 shrink-0 items-center justify-center gap-0.5 text-6xl font-light tracking-tight text-white select-none">
+              <FlipDigit char={String(temperature).padStart(2, "0")[0]} />
+              <FlipDigit char={String(temperature).padStart(2, "0")[1]} />
             </div>
 
             {/* Subtle Red Increment Button */}
