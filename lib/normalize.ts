@@ -256,6 +256,8 @@ export function telemetryFromAtlas(
 
   const speed = num(atlasStatus.speed);
   if (speed != null) next.speedKmh = Math.round(speed);
+  const avgSpeed = num(atlasStatus.aveSpeed ?? atlasStatus.averageSpeed ?? atlasStatus.avgSpeed);
+  if (avgSpeed != null) next.avgSpeedKmh = Math.round(avgSpeed);
 
   const serviceKm = num(atlasStatus.distanceToService);
   if (serviceKm != null) next.serviceKm = Math.round(serviceKm);
@@ -371,6 +373,8 @@ export function telemetryFromEcarx(
 
   const speed = num(basic?.speed);
   if (speed != null) next.speedKmh = Math.round(speed);
+  const avgSpeed = num(running?.aveSpeed ?? running?.averageSpeed ?? basic?.aveSpeed ?? basic?.averageSpeed);
+  if (avgSpeed != null) next.avgSpeedKmh = Math.round(avgSpeed);
 
   const serviceKm = num(maintenance?.distanceToService);
   if (serviceKm != null) next.serviceKm = Math.round(serviceKm);

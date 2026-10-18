@@ -72,6 +72,7 @@ export type Telemetry = {
   doorsOpen: { fl: boolean; fr: boolean; rl: boolean; rr: boolean };
   remainingDataGb?: number | null;
   usedDataGb?: number | null;
+  avgSpeedKmh?: number | null;
 };
 
 export type ControlAction =

@@ -13,8 +13,8 @@ export const DASHBOARD_PATHS = [
 
 type DashboardPath = (typeof DASHBOARD_PATHS)[number];
 
-function asDashboardPath(value: string): DashboardPath {
-  return (DASHBOARD_PATHS as readonly string[]).includes(value) ? (value as DashboardPath) : "/dashboard";
+function asDashboardPath(value: string | null | undefined): DashboardPath {
+  return value && (DASHBOARD_PATHS as readonly string[]).includes(value) ? (value as DashboardPath) : "/dashboard";
 }
 
 type DashboardNavValue = {

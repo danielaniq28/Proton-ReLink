@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal, Wifi } from "lucide-react";
+import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
@@ -171,6 +171,14 @@ export function Overview() {
           </div>
         </div>
 
+        {/* Average Speed */}
+        <div className="mt-1.5 flex items-center justify-center text-xs">
+          <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Avg Speed</span>
+            <span className="font-semibold text-white">{telemetry.avgSpeedKmh ?? 48} km/h</span>
+          </div>
+        </div>
+
         {/* Progress Bars: Service Schedule & Fuel Level */}
         <div className="mt-4 pt-3 border-t border-white/[0.06] px-1 flex flex-col gap-3">
           {/* Next Service Scheduled */}
@@ -193,22 +201,11 @@ export function Overview() {
           <div>
             <div className="flex items-center justify-between text-xs mb-1.5">
               <div className="flex items-center gap-1.5">
-                <Wifi className="h-3 w-3 text-cyan-400 shrink-0" />
                 <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Remaining Internet Data</span>
-                <span className="text-[10px] text-zinc-500 font-normal">
-                  ({totalDataGb.toFixed(totalDataGb % 1 === 0 ? 0 : 1)} GB total)
-                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white">
                   {remainingDataGb.toFixed(2)} / {totalDataGb.toFixed(totalDataGb % 1 === 0 ? 0 : 1)} GB
-                </span>
-                <span
-                  className={`text-[11px] font-medium ${
-                    dataPercent <= 15 ? "text-rose-300" : dataPercent <= 25 ? "text-amber-300" : "text-zinc-400"
-                  }`}
-                >
-                  ({dataPercent}%)
                 </span>
               </div>
             </div>

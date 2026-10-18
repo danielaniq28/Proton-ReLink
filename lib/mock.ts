@@ -183,6 +183,7 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
     doorsOpen: { fl: false, fr: false, rl: false, rr: false },
     remainingDataGb: profile.remainingDataGb ?? 1.5,
     usedDataGb: profile.usedDataGb ?? 0.5,
+    avgSpeedKmh: 48,
   };
 }
 
