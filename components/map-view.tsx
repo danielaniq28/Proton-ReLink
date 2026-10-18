@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { formatDateTime } from "@/lib/format";
 import { useVehicle } from "./vehicle-provider";
-import { TripLog } from "./trip-log";
 
 export function MapView() {
   const { vehicle, telemetry, refresh } = useVehicle();
@@ -87,11 +86,6 @@ export function MapView() {
         <p className="mt-3 text-xs text-zinc-500 text-center sm:text-left">
           {vehicle.carType} · heading {Math.round(telemetry.heading)}° · speed {telemetry.speedKmh} km/h
         </p>
-      </div>
-
-      {/* 3. Trip Log Section */}
-      <div className="pt-2 border-t border-white/[0.06]">
-        <TripLog vin={vehicle.vin} />
       </div>
     </div>
   );

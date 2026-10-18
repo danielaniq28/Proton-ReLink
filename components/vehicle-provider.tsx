@@ -159,59 +159,71 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     if (carType) params.set("carType", carType);
     if (backend) params.set("backend", backend);
     const query = params.toString() ? `?${params.toString()}` : "";
-    const response = await fetch(`/api/vehicles/${encodeURIComponent(vin)}/status${query}`, { cache: "no-store" });
-    if (generation !== statusGeneration.current) return;
-    if (response.status === 401) {
-      window.location.href = "/login";
-      return;
-    }
-    const data = (await response.json()) as StatusResponse;
-    if (generation !== statusGeneration.current) return;
-    // Prevent in-flight optimistic command state from being clobbered by older polling packet
-    if (pendingRef.current) return;
+    try {
+      const response = await fetch(`/api/vehicles/${encodeURIComponent(vin)}/status${query}`, { cache: "no-store" });
+      if (generation !== statusGeneration.current) return;
+      if (response.status === 401) {
+        window.location.href = "/login";
+        return;
+      }
+      if (!response.ok) return;
+      const data = (await response.json()) as StatusResponse;
+      if (generation !== statusGeneration.current || !data?.telemetry) return;
+      // Prevent in-flight optimistic command state from being clobbered by older polling packet
+      if (pendingRef.current) return;
 
-    setTelemetry((current) => {
-      if (!current || current.vin !== data.telemetry.vin) return data.telemetry;
-      return {
-        ...data.telemetry,
-        targetTemp: current.targetTemp,
-        climateMinutes: current.climateMinutes,
-      };
-    });
-    writeCachedStatus(data.telemetry);
-    setFallback(Boolean(data.fallback));
-    setWarning(data.warning);
+      setTelemetry((current) => {
+        if (!current || current.vin !== data.telemetry.vin) return data.telemetry;
+        return {
+          ...data.telemetry,
+          targetTemp: current.targetTemp,
+          climateMinutes: current.climateMinutes,
+        };
+      });
+      writeCachedStatus(data.telemetry);
+      setFallback(Boolean(data.fallback));
+      setWarning(data.warning);
+    } catch {
+      /* Suppress transient network poll failures */
+    }
   }, []);
 
   const loadGarage = useCallback(async () => {
-    const response = await fetch("/api/vehicles", { cache: "no-store" });
-    if (response.status === 401) {
-      window.location.href = "/login";
-      return;
-    }
-    const data = (await response.json()) as GarageResponse;
-    const resolvedVehicles = data.vehicles.map((v) => {
-      let plate = v.plate;
-      if (!plate) {
-        try {
-          const stored = window.localStorage.getItem(`pl_plate_${v.vin}`);
-          if (stored) plate = stored;
-        } catch {}
+    try {
+      const response = await fetch("/api/vehicles", { cache: "no-store" });
+      if (response.status === 401) {
+        window.location.href = "/login";
+        return;
       }
-      return { ...v, plate };
-    });
-    setVehicles(resolvedVehicles);
-    setDemo(data.demo);
-    const selected = resolvedVehicles.find((item) => item.vin === data.selectedVin) ?? resolvedVehicles[0] ?? null;
-    setVehicle(selected);
-    setWarning(data.warning);
-    setFallback(Boolean(data.fallback));
-    if (selected) {
-      const cached = readCachedStatus(selected.vin);
-      if (cached) setTelemetry(cached);
-      await loadStatus(selected.vin, selected.carType, selected.backend);
+      if (!response.ok) return;
+      const data = (await response.json()) as GarageResponse;
+      if (!data?.vehicles) return;
+      const resolvedVehicles = data.vehicles.map((v) => {
+        let plate = v.plate;
+        if (!plate) {
+          try {
+            const stored = window.localStorage.getItem(`pl_plate_${v.vin}`);
+            if (stored) plate = stored;
+          } catch {}
+        }
+        return { ...v, plate };
+      });
+      setVehicles(resolvedVehicles);
+      setDemo(data.demo);
+      const selected = resolvedVehicles.find((item) => item.vin === data.selectedVin) ?? resolvedVehicles[0] ?? null;
+      setVehicle(selected);
+      setWarning(data.warning);
+      setFallback(Boolean(data.fallback));
+      if (selected) {
+        const cached = readCachedStatus(selected.vin);
+        if (cached) setTelemetry(cached);
+        await loadStatus(selected.vin, selected.carType, selected.backend);
+      }
+    } catch {
+      /* Suppress transient network poll failures */
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [loadStatus]);
 
   useEffect(() => {

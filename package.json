@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
-    "build": "rm -rf .next && NODE_ENV=production next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "rm -f tsconfig.tsbuildinfo && tsc --noEmit"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
