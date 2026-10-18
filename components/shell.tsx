@@ -129,7 +129,7 @@ function MobileNav() {
   }
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom,0px))] md:hidden">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom))] md:hidden">
       <div className="w-full max-w-md overflow-hidden rounded-full">
         <div
           ref={trackRef}
@@ -214,7 +214,7 @@ function CommandStatusFloating() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.94 }}
           transition={{ type: "spring", stiffness: 450, damping: 30 }}
-          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
         >
           <div
             onClick={() => setDismissed(true)}
@@ -403,7 +403,7 @@ function Frame() {
             </div>
           ) : null}
 
-          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               <DashboardPanels />
             </div>
