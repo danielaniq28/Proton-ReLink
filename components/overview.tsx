@@ -45,6 +45,7 @@ export function Overview() {
     (vehicle.carType === "X90" ? 1.6 : vehicle.carType === "X70" ? 0.55 : vehicle.carType === "S70" ? 1.15 : 0.38);
   const totalDataGb = Math.max(0.1, Math.round((remainingDataGb + usedDataGb) * 100) / 100);
   const dataPercent = Math.max(0, Math.min(100, Math.round((remainingDataGb / totalDataGb) * 100)));
+  const servicePercent = Math.max(8, Math.min(100, Math.round(((10000 - ((telemetry.serviceKm ?? 0) % 10000)) / 10000) * 100)));
 
   const modules = [
     {
@@ -123,15 +124,16 @@ export function Overview() {
             </p>
           </div>
           <div className="relative shrink-0">
-            <FuelArc percent={telemetry.fuelPercent} rangeKm={telemetry.rangeKm} />
+            <FuelArc percent={fuelPercent} rangeKm={telemetry.rangeKm} />
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-1.5 sm:pb-2.5">
               <div className="flex items-baseline gap-0.5">
-                <span
-                  className="text-xl font-bold tracking-tight sm:text-2xl transition-colors duration-200"
-                  style={{ color: tone.color }}
+                <motion.span
+                  className="text-xl font-bold tracking-tight sm:text-2xl"
+                  animate={tone.level === "ok" ? { opacity: 1, color: tone.color } : { opacity: [1, 0.4, 1], color: tone.color }}
+                  transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   {telemetry.rangeKm}
-                </span>
+                </motion.span>
                 <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: tone.level === "ok" ? "#71717a" : tone.color }}>
                   km
                 </span>
@@ -187,9 +189,11 @@ export function Overview() {
               <span className="text-xs font-semibold text-white">{formatNumber(telemetry.serviceKm)} km</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-              <div
-                style={{ width: `${Math.max(8, Math.min(100, ((10000 - (telemetry.serviceKm % 10000)) / 10000) * 100))}%` }}
-                className="h-full rounded-full bg-white transition-all duration-500 ease-out"
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: `${servicePercent}%` }}
+                transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                className="h-full rounded-full bg-white"
               />
             </div>
           </div>
@@ -207,9 +211,11 @@ export function Overview() {
               </div>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-              <div
-                style={{ width: `${dataPercent}%` }}
-                className={`h-full rounded-full transition-all duration-500 ease-out ${
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: `${dataPercent}%` }}
+                transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
+                className={`h-full rounded-full transition-colors ${
                   dataPercent <= 15 ? "bg-rose-400" : dataPercent <= 25 ? "bg-amber-400" : "bg-cyan-400"
                 }`}
               />

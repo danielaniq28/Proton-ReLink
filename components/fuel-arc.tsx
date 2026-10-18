@@ -9,11 +9,11 @@ export function rangeTone(rangeKm: number) {
 }
 
 export function FuelArc({ percent, rangeKm = 999, className }: { percent: number; rangeKm?: number; className?: string }) {
-  const value = Math.max(0, Math.min(100, percent));
+  const value = Math.max(0, Math.min(100, Number.isFinite(percent) ? percent : 0));
   const radius = 86;
   const circumference = 2 * Math.PI * radius;
   const visible = circumference * 0.72;
-  const dash = (value / 100) * visible;
+  const targetOffset = visible * (1 - value / 100);
   const tone = rangeTone(rangeKm);
   const alerting = tone.level !== "ok";
 
@@ -30,7 +30,7 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
         strokeDasharray={`${visible} ${circumference}`}
         transform="rotate(140 110 110)"
       />
-      <circle
+      <motion.circle
         cx="110"
         cy="110"
         r={radius}
@@ -38,9 +38,19 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
         stroke={tone.color}
         strokeWidth="10"
         strokeLinecap="round"
-        strokeDasharray={`${dash} ${circumference}`}
+        strokeDasharray={`${visible} ${circumference}`}
         transform="rotate(140 110 110)"
-        className="transition-all duration-500 ease-out"
+        initial={{ strokeDashoffset: visible }}
+        animate={{
+          strokeDashoffset: targetOffset,
+          opacity: alerting ? [1, 0.35, 1] : 1,
+        }}
+        transition={{
+          strokeDashoffset: { duration: 1.1, ease: [0.16, 1, 0.3, 1] },
+          opacity: alerting
+            ? { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.3 },
+        }}
         style={alerting ? { filter: `drop-shadow(0 0 6px ${tone.color})` } : undefined}
       />
     </svg>
