@@ -58,40 +58,40 @@ export function ClimatePanel({
   const run = clampClimateMinutes(minutes);
 
   return (
-    <div className="flex w-full flex-col gap-5 sm:gap-6">
+    <div className="flex w-full flex-1 flex-col justify-between min-h-0 gap-2.5 sm:gap-4">
       {/* 1. Target Temperature Section */}
-      <div>
-        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-2.5 sm:mb-3">
+      <div className="flex-1 flex flex-col min-h-0">
+        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-1.5 sm:mb-2.5 shrink-0">
           Target Temperature
         </h2>
-        <section className="rounded-[28px] border border-white/[0.08] bg-white/[0.04] backdrop-blur-md p-6 sm:p-8 text-center shadow-sm">
+        <section className="flex-1 flex flex-col justify-between items-center rounded-2xl sm:rounded-[28px] border border-white/[0.08] bg-white/[0.04] backdrop-blur-md p-4 sm:p-6 text-center shadow-sm min-h-0">
           {/* Interior & Exterior Temperatures Enclosed in Pills (matches Overview) */}
-          <div className="flex items-center justify-center gap-2.5 text-xs">
-            <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+          <div className="flex items-center justify-center gap-2 text-xs shrink-0">
+            <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 sm:px-3 sm:py-1">
               <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Interior</span>
               <span className="font-semibold text-white">{telemetry.interiorTemp}°C</span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+            <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 sm:px-3 sm:py-1">
               <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Exterior</span>
               <span className="font-semibold text-white">{telemetry.exteriorTemp}°C</span>
             </div>
           </div>
 
           {/* Temperature Selector with Fixed Geometry (buttons do not move when changing temperature) */}
-          <div className="mt-6 flex items-center justify-center gap-4 sm:gap-6 text-zinc-100">
+          <div className="my-auto flex items-center justify-center gap-3 sm:gap-6 text-zinc-100 py-1">
             {/* Subtle Blue Decrement Button */}
             <button
               type="button"
               aria-label="Decrease temperature"
               disabled={temperature <= MIN_TEMP}
               onClick={() => onTemp(temperature - 1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-sky-400/25 bg-sky-500/10 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.08)] transition-all hover:bg-sky-500/20 hover:border-sky-400/40 hover:text-sky-300 active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+              className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border border-sky-400/25 bg-sky-500/10 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.08)] transition-all hover:bg-sky-500/20 hover:border-sky-400/40 hover:text-sky-300 active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
             {/* Strict Fixed Width Container to prevent any button shifting */}
-            <div className="relative flex h-20 w-32 shrink-0 items-center justify-center gap-0.5 text-6xl font-light tracking-tight text-white select-none">
+            <div className="relative flex h-16 sm:h-20 w-28 sm:w-32 shrink-0 items-center justify-center gap-0.5 text-5xl sm:text-6xl font-light tracking-tight text-white select-none">
               <FlipDigit char={String(temperature).padStart(2, "0")[0]} />
               <FlipDigit char={String(temperature).padStart(2, "0")[1]} />
             </div>
@@ -102,18 +102,18 @@ export function ClimatePanel({
               aria-label="Increase temperature"
               disabled={temperature >= MAX_TEMP}
               onClick={() => onTemp(temperature + 1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-rose-500/25 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.08)] transition-all hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300 active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+              className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border border-rose-500/25 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.08)] transition-all hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300 active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
-          <p className="mt-2 text-xs tracking-[0.16em] text-zinc-500 uppercase">18–31°C</p>
+          <p className="text-[10px] sm:text-xs tracking-[0.16em] text-zinc-500 uppercase shrink-0">18–31°C</p>
 
           <button
             type="button"
             onClick={onToggle}
             disabled={pendingAction != null}
-            className={`mx-auto mt-6 flex items-center gap-2.5 rounded-full px-6 py-2.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
+            className={`mx-auto mt-2 sm:mt-3 shrink-0 flex items-center gap-2.5 rounded-full px-5 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
               telemetry.climateOn
                 ? "bg-white text-black shadow-lg shadow-white/10 hover:bg-zinc-200"
                 : "border border-white/[0.08] bg-white/[0.06] text-zinc-300 hover:bg-white/[0.1] hover:text-white"
@@ -130,17 +130,17 @@ export function ClimatePanel({
       </div>
 
       {/* 2. Duration & Schedule Section with Circle Preset Buttons */}
-      <div>
-        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-2.5 sm:mb-3">
+      <div className="shrink-0">
+        <h2 className="text-xs sm:text-sm font-semibold tracking-[0.1em] uppercase text-zinc-400 mb-1.5 sm:mb-2">
           Preset Duration
         </h2>
-        <section className="rounded-[28px] border border-white/[0.08] bg-white/[0.04] p-5 sm:p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs sm:text-sm text-zinc-300">
+        <section className="rounded-2xl sm:rounded-[28px] border border-white/[0.08] bg-white/[0.04] p-3.5 sm:p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-zinc-300">
             <div>
-              <span className="font-medium text-white text-sm">Auto-off Timer</span>
-              <p className="text-xs text-zinc-500 mt-0.5">Shuts down cabin A/C after preset runtime ({run} min)</p>
+              <span className="font-medium text-white text-xs sm:text-sm">Auto-off Timer</span>
+              <p className="text-[11px] text-zinc-500 mt-0.5">Shuts down cabin A/C after preset runtime ({run} min)</p>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap">
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
               {CLIMATE_MINUTES.map((m) => {
                 const isSelected = run === m;
                 return (
@@ -148,7 +148,7 @@ export function ClimatePanel({
                     key={m}
                     type="button"
                     onClick={() => onMinutes(m)}
-                    className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+                    className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs font-semibold transition-all active:scale-95 cursor-pointer ${
                       isSelected
                         ? "bg-white text-zinc-950 font-bold shadow-md shadow-white/10 ring-2 ring-white/50"
                         : "border border-white/[0.08] bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white"
@@ -159,7 +159,7 @@ export function ClimatePanel({
                   </button>
                 );
               })}
-              <span className="text-xs font-medium text-zinc-400 pl-1">min</span>
+              <span className="text-[10px] font-medium text-zinc-400 pl-0.5">min</span>
             </div>
           </div>
         </section>

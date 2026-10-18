@@ -13,12 +13,12 @@ export function ClimateView() {
   const temperature = Math.min(31, Math.max(18, telemetry.targetTemp || 18));
 
   return (
-    <div className="flex w-full flex-col gap-5 sm:gap-6">
+    <div className="flex w-full flex-1 flex-col justify-between min-h-0 gap-3 sm:gap-4">
       {/* Consistent iOS Header */}
-      <div>
+      <div className="shrink-0">
         <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-zinc-400">Climate</p>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mt-0.5">Climate Control</h1>
-        <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-white mt-0.5">Climate Control</h1>
+        <p className="mt-0.5 text-xs text-zinc-400">
           {vehicle.carType} · {vehicle.plate || vehicle.vin}
         </p>
       </div>
