@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "crypto";
 import { listFromEnvelope, mergeVehicles, objectFromEnvelope, vehicleFromAtlas, vehicleFromLegacy } from "./normalize";
-import { clampClimateMinutes, mockTripRecords } from "./mock";
-import type { ApiEnvelope, ControlAction, LoginEntity, Session, TripRecord, Vehicle } from "./types";
+import { clampClimateMinutes } from "./mock";
+import type { ApiEnvelope, ControlAction, LoginEntity, Session, Vehicle } from "./types";
 
 const LEGACY = process.env.PROTON_LEGACY_BASE ?? "https://app.acotech.my:8443";
 const ATLAS = process.env.PROTON_ATLAS_BASE ?? "https://app-atlas.acotech.my:8443";
@@ -278,63 +278,4 @@ export async function sendCommand(
     throw new ProtonError(messageOf(payload, "Command was not accepted"), 400);
   }
   return objectFromEnvelope(payload);
-}
-
-export async function fetchTripRecords(session: Session, vin: string): Promise<TripRecord[]> {
-  try {
-    const payload = await callProton(
-      LEGACY,
-      "/bigdata/vehicle/trip/queryList/app/v1",
-      session,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          startTime: Date.now() - 30 * 24 * 60 * 60 * 1000,
-          endTime: Date.now(),
-          vin,
-          isPage: true,
-          currentPage: 1,
-          pageSize: 15,
-        }),
-      },
-    );
-    const list = listFromEnvelope(payload);
-    if (Array.isArray(list) && list.length > 0) {
-      return list.map((item, index) => {
-        const r = item as Record<string, unknown>;
-        const start = typeof r.tripStartTime === "number" ? r.tripStartTime : Date.now() - (index + 1) * 3600000;
-        const end = typeof r.tripEndTime === "number" ? r.tripEndTime : start + 1800000;
-        const distance = Number(r.tripUseMiles) || 12.4;
-        const durationSec = Number(r.tripUseTimes) || 1500;
-        const durationMin = Math.max(1, Math.round(durationSec > 1000 ? durationSec / 60 : durationSec));
-        const avgSpd = Number(r.avgSpeed) || Math.round((distance / (durationMin / 60)) || 42);
-        const fuel = Number(r.tripPowerCns);
-
-        return {
-          id: String(r.id || `${vin}-${start}`),
-          vin,
-          startTime: start,
-          endTime: end,
-          distanceKm: Math.round(distance * 10) / 10,
-          durationMinutes: durationMin,
-          avgSpeedKmh: Math.round(avgSpd),
-          fuelEfficiencyLPer100Km: fuel > 0 ? Math.round(fuel * 10) / 10 : undefined,
-          startPlace: String(r.startAddressTitle || r.startAddressText || "Departure Point"),
-          endPlace: String(r.endAddressTitle || r.endAddressText || "Arrival Point"),
-          startCoords:
-            r.tripStartLatitude && r.tripStartLongitude
-              ? { lat: Number(r.tripStartLatitude), lng: Number(r.tripStartLongitude) }
-              : undefined,
-          endCoords:
-            r.tripEndLatitude && r.tripEndLongitude
-              ? { lat: Number(r.tripEndLatitude), lng: Number(r.tripEndLongitude) }
-              : undefined,
-        };
-      });
-    }
-  } catch {
-    /* fallback to mock trip records */
-  }
-
-  return mockTripRecords(vin);
 }

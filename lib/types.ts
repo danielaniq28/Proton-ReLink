@@ -100,18 +100,3 @@ export type ApiEnvelope = {
   originData?: unknown;
   exceptionCode?: string;
 };
-
-export type TripRecord = {
-  id: string;
-  vin: string;
-  startTime: number;
-  endTime: number;
-  distanceKm: number;
-  durationMinutes: number;
-  avgSpeedKmh: number;
-  fuelEfficiencyLPer100Km?: number;
-  startPlace: string;
-  endPlace: string;
-  startCoords?: { lat: number; lng: number };
-  endCoords?: { lat: number; lng: number };
-};

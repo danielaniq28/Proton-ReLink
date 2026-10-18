@@ -1,4 +1,4 @@
-import type { Telemetry, TripRecord, Vehicle } from "./types";
+import type { Telemetry, Vehicle } from "./types";
 
 const now = () => Date.now();
 
@@ -240,66 +240,4 @@ export function applyMockCommand(
       break;
   }
   return next;
-}
-
-export function mockTripRecords(vin: string): TripRecord[] {
-  const now = Date.now();
-  return [
-    {
-      id: `${vin}-trip-1`,
-      vin,
-      startTime: now - 3 * 3600 * 1000,
-      endTime: now - 2.5 * 3600 * 1000,
-      distanceKm: 21.4,
-      durationMinutes: 32,
-      avgSpeedKmh: 42,
-      fuelEfficiencyLPer100Km: 6.9,
-      startPlace: "Mid Valley Megamall, KL",
-      endPlace: "Cyberjaya City Centre",
-      startCoords: { lat: 3.1179, lng: 101.6775 },
-      endCoords: { lat: 2.9213, lng: 101.6559 },
-    },
-    {
-      id: `${vin}-trip-2`,
-      vin,
-      startTime: now - 24 * 3600 * 1000 - 45 * 60 * 1000,
-      endTime: now - 24 * 3600 * 1000,
-      distanceKm: 14.2,
-      durationMinutes: 28,
-      avgSpeedKmh: 36,
-      fuelEfficiencyLPer100Km: 7.4,
-      startPlace: "Bangsar South, KL",
-      endPlace: "Sunway Pyramid, Petaling Jaya",
-      startCoords: { lat: 3.1111, lng: 101.6664 },
-      endCoords: { lat: 3.0733, lng: 101.6078 },
-    },
-    {
-      id: `${vin}-trip-3`,
-      vin,
-      startTime: now - 48 * 3600 * 1000 - 75 * 60 * 1000,
-      endTime: now - 48 * 3600 * 1000,
-      distanceKm: 46.8,
-      durationMinutes: 52,
-      avgSpeedKmh: 64,
-      fuelEfficiencyLPer100Km: 6.2,
-      startPlace: "KLCC Twin Towers",
-      endPlace: "KLIA Terminal 2, Sepang",
-      startCoords: { lat: 3.1579, lng: 101.7118 },
-      endCoords: { lat: 2.7433, lng: 101.6869 },
-    },
-    {
-      id: `${vin}-trip-4`,
-      vin,
-      startTime: now - 72 * 3600 * 1000 - 20 * 60 * 1000,
-      endTime: now - 72 * 3600 * 1000,
-      distanceKm: 8.5,
-      durationMinutes: 18,
-      avgSpeedKmh: 31,
-      fuelEfficiencyLPer100Km: 7.8,
-      startPlace: "1 Utama Shopping Centre",
-      endPlace: "SS2, Petaling Jaya",
-      startCoords: { lat: 3.1502, lng: 101.6152 },
-      endCoords: { lat: 3.1189, lng: 101.6214 },
-    },
-  ];
 }
