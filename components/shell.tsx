@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { Activity, Download, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
+import { Activity, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { DashboardNavProvider, useDashboardNav } from "./dashboard-nav";
 import { DashboardPanels } from "./dashboard-panels";
@@ -129,7 +129,7 @@ function MobileNav() {
   }
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom))] md:hidden">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom,0px))] md:hidden">
       <div className="w-full max-w-md overflow-hidden rounded-full">
         <div
           ref={trackRef}
@@ -214,7 +214,7 @@ function CommandStatusFloating() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.94 }}
           transition={{ type: "spring", stiffness: 450, damping: 30 }}
-          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
         >
           <div
             onClick={() => setDismissed(true)}
@@ -341,22 +341,6 @@ function Frame() {
                     alt="Powered by mark"
                     className="h-3 sm:h-3.5 w-auto object-contain inline-block opacity-80"
                   />
-                  {vehicle ? (
-                    <span
-                      className={`ml-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
-                        (telemetry?.backend || vehicle.backend) === "atlas"
-                          ? "border border-amber-500/30 bg-amber-500/10 text-amber-300"
-                          : "border border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
-                      }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          (telemetry?.backend || vehicle.backend) === "atlas" ? "bg-amber-400" : "bg-cyan-400"
-                        }`}
-                      />
-                      {(telemetry?.backend || vehicle.backend) === "atlas" ? "ATLAS" : "ECARX"}
-                    </span>
-                  ) : null}
                 </div>
 
                 {/* 2. Vehicle Model & Plate */}
@@ -399,20 +383,6 @@ function Frame() {
               <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      window.dispatchEvent(new CustomEvent("pl_open_pwa_prompt"));
-                    }
-                  }}
-                  title="Install Proton Re-Link"
-                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 sm:px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer active:scale-95 shadow-sm"
-                >
-                  <Download className="h-3 w-3 text-cyan-400" />
-                  <span className="hidden xs:inline">Install</span>
-                </button>
-
-                <button
-                  type="button"
                   disabled={signingOut}
                   onClick={logout}
                   aria-label="Sign out"
@@ -433,7 +403,7 @@ function Frame() {
             </div>
           ) : null}
 
-          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               <DashboardPanels />
             </div>

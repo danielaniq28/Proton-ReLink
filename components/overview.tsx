@@ -126,13 +126,12 @@ export function Overview() {
             <FuelArc percent={telemetry.fuelPercent} rangeKm={telemetry.rangeKm} />
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-1.5 sm:pb-2.5">
               <div className="flex items-baseline gap-0.5">
-                <motion.span
-                  className="text-xl font-bold tracking-tight sm:text-2xl"
-                  animate={tone.level === "ok" ? { opacity: 1, color: tone.color } : { opacity: [1, 0.4, 1], color: tone.color }}
-                  transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }}
+                <span
+                  className="text-xl font-bold tracking-tight sm:text-2xl transition-colors duration-200"
+                  style={{ color: tone.color }}
                 >
                   {telemetry.rangeKm}
-                </motion.span>
+                </span>
                 <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: tone.level === "ok" ? "#71717a" : tone.color }}>
                   km
                 </span>
@@ -188,11 +187,9 @@ export function Overview() {
               <span className="text-xs font-semibold text-white">{formatNumber(telemetry.serviceKm)} km</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.max(8, Math.min(100, ((10000 - (telemetry.serviceKm % 10000)) / 10000) * 100))}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="h-full rounded-full bg-white"
+              <div
+                style={{ width: `${Math.max(8, Math.min(100, ((10000 - (telemetry.serviceKm % 10000)) / 10000) * 100))}%` }}
+                className="h-full rounded-full bg-white transition-all duration-500 ease-out"
               />
             </div>
           </div>
@@ -210,11 +207,9 @@ export function Overview() {
               </div>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${dataPercent}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className={`h-full rounded-full transition-colors ${
+              <div
+                style={{ width: `${dataPercent}%` }}
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
                   dataPercent <= 15 ? "bg-rose-400" : dataPercent <= 25 ? "bg-amber-400" : "bg-cyan-400"
                 }`}
               />

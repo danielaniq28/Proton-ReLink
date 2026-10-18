@@ -30,7 +30,7 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
         strokeDasharray={`${visible} ${circumference}`}
         transform="rotate(140 110 110)"
       />
-      <motion.circle
+      <circle
         cx="110"
         cy="110"
         r={radius}
@@ -40,13 +40,7 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
         strokeLinecap="round"
         strokeDasharray={`${dash} ${circumference}`}
         transform="rotate(140 110 110)"
-        initial={{ strokeDasharray: `0 ${circumference}` }}
-        animate={alerting ? { strokeDasharray: `${dash} ${circumference}`, opacity: [1, 0.35, 1] } : { strokeDasharray: `${dash} ${circumference}`, opacity: 1 }}
-        transition={
-          alerting
-            ? { opacity: { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }, strokeDasharray: { type: "spring", stiffness: 80, damping: 20 } }
-            : { type: "spring", stiffness: 80, damping: 20 }
-        }
+        className="transition-all duration-500 ease-out"
         style={alerting ? { filter: `drop-shadow(0 0 6px ${tone.color})` } : undefined}
       />
     </svg>

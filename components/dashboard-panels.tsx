@@ -26,10 +26,10 @@ export function DashboardPanels() {
         return (
           <motion.div
             key={href}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.14, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeInOut" }}
             className="w-full flex-1 flex flex-col min-h-0"
           >
             <View />
