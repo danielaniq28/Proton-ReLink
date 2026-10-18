@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { mockVehicles } from "@/lib/mock";
 import { ProtonError, fetchVehicles } from "@/lib/proton";
-import { readSession, writeSession } from "@/lib/session";
+import { clearSession, readSession, writeSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,13 @@ export async function GET() {
 
   try {
     const vehicles = await fetchVehicles(session);
+    if (!vehicles || vehicles.length === 0) {
+      await clearSession();
+      return NextResponse.json(
+        { message: "No vehicles returned for your account", vehicles: [], error: "no_vehicles" },
+        { status: 404 }
+      );
+    }
     const selected =
       vehicles.find((vehicle) => vehicle.vin === session.selectedVin)?.vin ??
       vehicles.find((vehicle) => vehicle.isDefault)?.vin ??
@@ -31,14 +38,16 @@ export async function GET() {
     }
     return NextResponse.json({ demo: false, vehicles, selectedVin: selected ?? null, warning: null });
   } catch (error) {
-    const vehicles = mockVehicles();
+    await clearSession();
     const message = error instanceof ProtonError ? error.message : "Vehicle list unavailable";
-    return NextResponse.json({
-      demo: false,
-      fallback: true,
-      vehicles,
-      selectedVin: vehicles[0].vin,
-      warning: `${message}. Showing a simulated garage so the cockpit stays usable.`,
-    });
+    const status = error instanceof ProtonError && error.status === 401 ? 401 : 404;
+    return NextResponse.json(
+      {
+        message,
+        vehicles: [],
+        error: "no_vehicles",
+      },
+      { status }
+    );
   }
 }

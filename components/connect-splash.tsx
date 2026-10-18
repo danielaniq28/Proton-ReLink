@@ -9,7 +9,13 @@ export function ConnectSplash() {
 
   useEffect(() => {
     const started = performance.now();
-    const vehicles = fetch("/api/vehicles", { cache: "no-store" }).catch(() => null);
+    const vehiclesPromise = fetch("/api/vehicles", { cache: "no-store" })
+      .then(async (res) => {
+        if (!res.ok) return null;
+        return (await res.json()) as { vehicles?: unknown[]; fallback?: boolean; demo?: boolean };
+      })
+      .catch(() => null);
+
     let frame = 0;
     const tick = (now: number) => {
       const value = Math.min(1, (now - started) / 2200);
@@ -18,7 +24,11 @@ export function ConnectSplash() {
         frame = requestAnimationFrame(tick);
         return;
       }
-      void vehicles.finally(() => {
+      void vehiclesPromise.then((data) => {
+        if (!data || !data.vehicles || data.vehicles.length === 0 || (data.fallback && !data.demo)) {
+          router.replace("/login?signout=1&error=no_vehicles");
+          return;
+        }
         router.replace("/dashboard");
         router.refresh();
       });

@@ -12,7 +12,6 @@
     "lint": "rm -f tsconfig.tsbuildinfo && tsc --noEmit"
   },
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
     "next": "15.5.9",

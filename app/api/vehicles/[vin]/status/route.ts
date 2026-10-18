@@ -49,14 +49,8 @@ export async function GET(request: Request, { params }: Params) {
         warning: `${message}. Showing the last status retrieved.`,
       });
     }
-    const telemetry = { ...mockTelemetry(vehicle), backend };
-    state[vin] = telemetry;
-    await writeMockState(state);
-    return NextResponse.json({
-      telemetry,
-      fallback: true,
-      warning: `${message}. Simulated readings are shown until the vehicle responds.`,
-    });
+    const status = error instanceof ProtonError && error.status === 401 ? 401 : 502;
+    return NextResponse.json({ message, telemetry: null, fallback: false }, { status });
   }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Lock, Phone } from "lucide-react";
 
@@ -11,6 +11,15 @@ export function LoginScreen() {
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"login" | "demo" | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("error") === "no_vehicles") {
+        setError("No vehicles found for your account. Please check your credentials or Proton app.");
+      }
+    }
+  }, []);
 
   function enter() {
     router.replace("/connecting");

@@ -169,6 +169,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) return;
       const data = (await response.json()) as StatusResponse;
       if (generation !== statusGeneration.current || !data?.telemetry) return;
+      if (data.fallback && !demo) return;
       // Prevent in-flight optimistic command state from being clobbered by older polling packet
       if (pendingRef.current) return;
 
@@ -191,13 +192,21 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   const loadGarage = useCallback(async () => {
     try {
       const response = await fetch("/api/vehicles", { cache: "no-store" });
-      if (response.status === 401) {
-        window.location.href = "/login";
+      if (response.status === 401 || !response.ok) {
+        try {
+          window.localStorage.removeItem(STATUS_CACHE);
+        } catch {}
+        window.location.href = "/login?signout=1&error=no_vehicles";
         return;
       }
-      if (!response.ok) return;
       const data = (await response.json()) as GarageResponse;
-      if (!data?.vehicles) return;
+      if (!data?.vehicles || data.vehicles.length === 0 || (data.fallback && !data.demo)) {
+        try {
+          window.localStorage.removeItem(STATUS_CACHE);
+        } catch {}
+        window.location.href = "/login?signout=1&error=no_vehicles";
+        return;
+      }
       const resolvedVehicles = data.vehicles.map((v) => {
         let plate = v.plate;
         if (!plate) {
@@ -211,16 +220,21 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       setVehicles(resolvedVehicles);
       setDemo(data.demo);
       const selected = resolvedVehicles.find((item) => item.vin === data.selectedVin) ?? resolvedVehicles[0] ?? null;
+      if (!selected) {
+        try {
+          window.localStorage.removeItem(STATUS_CACHE);
+        } catch {}
+        window.location.href = "/login?signout=1&error=no_vehicles";
+        return;
+      }
       setVehicle(selected);
       setWarning(data.warning);
       setFallback(Boolean(data.fallback));
-      if (selected) {
-        const cached = readCachedStatus(selected.vin);
-        if (cached) setTelemetry(cached);
-        await loadStatus(selected.vin, selected.carType, selected.backend);
-      }
+      const cached = readCachedStatus(selected.vin);
+      if (cached) setTelemetry(cached);
+      await loadStatus(selected.vin, selected.carType, selected.backend);
     } catch {
-      /* Suppress transient network poll failures */
+      window.location.href = "/login?signout=1&error=no_vehicles";
     } finally {
       setLoading(false);
     }

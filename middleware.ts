@@ -5,7 +5,7 @@ const SESSION = "pl_session";
 
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
-  const isSignout = searchParams.has("signout") || searchParams.has("logout");
+  const isSignout = searchParams.has("signout") || searchParams.has("logout") || searchParams.has("error");
 
   if (pathname === "/login" && isSignout) {
     const response = NextResponse.next();
