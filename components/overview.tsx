@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal } from "lucide-react";
+import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal, Wifi } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
@@ -37,6 +37,15 @@ export function Overview() {
       : Math.round(((telemetry.fuelPercent ?? 0) / 100) * maxTankLitres * 10) / 10;
   const fuelPercent = Math.max(0, Math.min(100, telemetry.fuelPercent ?? (currentFuelLitres / maxTankLitres) * 100));
 
+  const remainingDataGb =
+    telemetry.remainingDataGb ??
+    (vehicle.carType === "X90" ? 3.4 : vehicle.carType === "X70" ? 1.45 : vehicle.carType === "S70" ? 0.85 : 1.62);
+  const usedDataGb =
+    telemetry.usedDataGb ??
+    (vehicle.carType === "X90" ? 1.6 : vehicle.carType === "X70" ? 0.55 : vehicle.carType === "S70" ? 1.15 : 0.38);
+  const totalDataGb = Math.max(0.1, Math.round((remainingDataGb + usedDataGb) * 100) / 100);
+  const dataPercent = Math.max(0, Math.min(100, Math.round((remainingDataGb / totalDataGb) * 100)));
+
   const modules = [
     {
       href: "/dashboard/controls",
@@ -64,6 +73,9 @@ export function Overview() {
     },
   ];
 
+  const batteryVoltage = telemetry.batteryVoltage ?? 12.6;
+  const isBatteryLow = batteryVoltage < 12.0;
+
   const stats: Array<{ label: string; value: string; dot?: "green" | "amber" }> = [
     {
       label: "Engine",
@@ -71,7 +83,11 @@ export function Overview() {
       dot: telemetry.engineOn ? "amber" : "green",
     },
     { label: "Efficiency", value: `${telemetry.efficiencyLPer100.toFixed(1)} L / 100 km` },
-    { label: "Fuel", value: `${currentFuelLitres.toFixed(currentFuelLitres % 1 === 0 ? 0 : 1)} / ${maxTankLitres} L` },
+    {
+      label: "Battery",
+      value: `${batteryVoltage.toFixed(1)} V`,
+      dot: isBatteryLow ? "amber" : "green",
+    },
     { label: "Service in", value: `${formatNumber(telemetry.serviceKm)} km` },
   ];
   const tone = rangeTone(telemetry.rangeKm);
@@ -173,27 +189,36 @@ export function Overview() {
             </div>
           </div>
 
-          {/* Fuel Indicator Bar */}
+          {/* Internet Data Quota Bar */}
           <div>
             <div className="flex items-center justify-between text-xs mb-1.5">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Fuel Level</span>
-                <span className="text-[10px] text-zinc-500 font-normal">({maxTankLitres}L max tank)</span>
+                <Wifi className="h-3 w-3 text-cyan-400 shrink-0" />
+                <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Remaining Internet Data</span>
+                <span className="text-[10px] text-zinc-500 font-normal">
+                  ({totalDataGb.toFixed(totalDataGb % 1 === 0 ? 0 : 1)} GB total)
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white">
-                  {currentFuelLitres.toFixed(currentFuelLitres % 1 === 0 ? 0 : 1)} / {maxTankLitres} L
+                  {remainingDataGb.toFixed(2)} / {totalDataGb.toFixed(totalDataGb % 1 === 0 ? 0 : 1)} GB
                 </span>
-                <span className="text-[11px] text-zinc-400 font-medium">({Math.round(fuelPercent)}%)</span>
+                <span
+                  className={`text-[11px] font-medium ${
+                    dataPercent <= 15 ? "text-rose-300" : dataPercent <= 25 ? "text-amber-300" : "text-zinc-400"
+                  }`}
+                >
+                  ({dataPercent}%)
+                </span>
               </div>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${fuelPercent}%` }}
+                animate={{ width: `${dataPercent}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className={`h-full rounded-full transition-colors ${
-                  fuelPercent <= 15 ? "bg-rose-400" : fuelPercent <= 25 ? "bg-amber-400" : "bg-white"
+                  dataPercent <= 15 ? "bg-rose-400" : dataPercent <= 25 ? "bg-amber-400" : "bg-cyan-400"
                 }`}
               />
             </div>
@@ -231,6 +256,11 @@ export function Overview() {
                     <>
                       {telemetry.efficiencyLPer100.toFixed(1)}
                       <span className="ml-1 text-xs font-normal text-zinc-400">L / 100 km</span>
+                    </>
+                  ) : stat.label === "Battery" ? (
+                    <>
+                      {batteryVoltage.toFixed(1)}
+                      <span className="ml-1 text-xs font-normal text-zinc-400">V</span>
                     </>
                   ) : (
                     stat.value

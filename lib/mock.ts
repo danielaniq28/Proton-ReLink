@@ -98,6 +98,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "KLCC, Kuala Lumpur",
       interiorTemp: 24,
       exteriorTemp: 31,
+      remainingDataGb: 1.45,
+      usedDataGb: 0.55,
     },
     S70: {
       fuelPercent: 41,
@@ -111,6 +113,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "Bukit Bintang, Kuala Lumpur",
       interiorTemp: 23,
       exteriorTemp: 32,
+      remainingDataGb: 0.85,
+      usedDataGb: 1.15,
     },
     X50: {
       fuelPercent: 82,
@@ -124,6 +128,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "Subang Jaya, Selangor",
       interiorTemp: 22,
       exteriorTemp: 30,
+      remainingDataGb: 1.62,
+      usedDataGb: 0.38,
     },
     X90: {
       fuelPercent: 55,
@@ -137,6 +143,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "Ampang, Kuala Lumpur",
       interiorTemp: 23,
       exteriorTemp: 31,
+      remainingDataGb: 3.4,
+      usedDataGb: 1.6,
     },
   };
   const profile = profiles[vehicle.carType] ?? profiles.X70;
@@ -173,6 +181,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
     place: profile.place ?? "Kuala Lumpur",
     tires: tires(vehicle.carType === "X50" ? 230 : 240, 34),
     doorsOpen: { fl: false, fr: false, rl: false, rr: false },
+    remainingDataGb: profile.remainingDataGb ?? 1.5,
+    usedDataGb: profile.usedDataGb ?? 0.5,
   };
 }
 

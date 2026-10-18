@@ -70,6 +70,8 @@ export type Telemetry = {
     rr: TireCorner;
   };
   doorsOpen: { fl: boolean; fr: boolean; rl: boolean; rr: boolean };
+  remainingDataGb?: number | null;
+  usedDataGb?: number | null;
 };
 
 export type ControlAction =

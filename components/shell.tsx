@@ -2,13 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { Activity, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
+import { Activity, Download, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { DashboardNavProvider, useDashboardNav } from "./dashboard-nav";
 import { DashboardPanels } from "./dashboard-panels";
 import { VehicleProvider, useVehicle } from "./vehicle-provider";
 import { VehicleBanner } from "./vehicle-banner";
 import { SignOutSplash } from "./signout-splash";
+import { PWAInstallPrompt } from "./pwa-install-prompt";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: Gauge },
@@ -394,8 +395,22 @@ function Frame() {
                 </div>
               </div>
 
-              {/* 4. Compact Apple-style Sign Out button */}
-              <div className="flex shrink-0 items-center">
+              {/* 4. Compact Apple-style Action buttons */}
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("pl_open_pwa_prompt"));
+                    }
+                  }}
+                  title="Install Proton Re-Link"
+                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 sm:px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <Download className="h-3 w-3 text-cyan-400" />
+                  <span className="hidden xs:inline">Install</span>
+                </button>
+
                 <button
                   type="button"
                   disabled={signingOut}
@@ -427,6 +442,7 @@ function Frame() {
       </div>
 
       <CommandStatusFloating />
+      <PWAInstallPrompt />
       <MobileNav />
     </div>
     </LayoutGroup>
