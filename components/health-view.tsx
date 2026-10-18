@@ -26,6 +26,7 @@ export function HealthView() {
     { label: "Battery voltage", value: telemetry.batteryVoltage == null ? "—" : `${telemetry.batteryVoltage.toFixed(1)} V` },
     { label: "Odometer", value: `${formatNumber(telemetry.odometerKm)} km` },
     { label: "Distance to service", value: `${formatNumber(telemetry.serviceKm)} km` },
+    { label: "Telematics protocol", value: (telemetry.backend || vehicle.backend) === "atlas" ? "ACO Tech · ATLAS" : "ECARX · Legacy" },
   ];
 
   return (

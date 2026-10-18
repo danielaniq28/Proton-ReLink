@@ -63,6 +63,20 @@ export function VehicleBanner({
               {vehicle.plate}
             </span>
           ) : null}
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${
+              (telemetry.backend || vehicle.backend) === "atlas"
+                ? "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                : "border border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                (telemetry.backend || vehicle.backend) === "atlas" ? "bg-amber-400" : "bg-cyan-400"
+              }`}
+            />
+            {(telemetry.backend || vehicle.backend) === "atlas" ? "ACO Tech · ATLAS" : "ECARX · Legacy"}
+          </span>
         </div>
         <div className="mt-0.5 text-xs text-zinc-400 flex items-center gap-1.5 flex-wrap">
           <AnimatePresence mode="wait" initial={false}>

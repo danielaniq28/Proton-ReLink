@@ -81,7 +81,23 @@ export function Overview() {
       <section className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="min-w-0">
-            <p className="truncate text-[11px] tracking-[0.16em] text-zinc-400 uppercase font-semibold">{vehicle.colorName || "Proton"}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="truncate text-[11px] tracking-[0.16em] text-zinc-400 uppercase font-semibold">{vehicle.colorName || "Proton"}</p>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
+                  (telemetry.backend || vehicle.backend) === "atlas"
+                    ? "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                    : "border border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    (telemetry.backend || vehicle.backend) === "atlas" ? "bg-amber-400" : "bg-cyan-400"
+                  }`}
+                />
+                {(telemetry.backend || vehicle.backend) === "atlas" ? "ACO Tech · ATLAS" : "ECARX · Legacy"}
+              </span>
+            </div>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white mt-0.5">{vehicle.carType}</h1>
             <p className="mt-0.5 truncate text-xs sm:text-sm text-zinc-400">
               {vehicle.plate || vehicle.vin}

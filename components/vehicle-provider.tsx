@@ -153,9 +153,12 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     };
   }, [vehicle]);
 
-  const loadStatus = useCallback(async (vin: string, carType?: string) => {
+  const loadStatus = useCallback(async (vin: string, carType?: string, backend?: string) => {
     const generation = ++statusGeneration.current;
-    const query = carType ? `?carType=${encodeURIComponent(carType)}` : "";
+    const params = new URLSearchParams();
+    if (carType) params.set("carType", carType);
+    if (backend) params.set("backend", backend);
+    const query = params.toString() ? `?${params.toString()}` : "";
     const response = await fetch(`/api/vehicles/${encodeURIComponent(vin)}/status${query}`, { cache: "no-store" });
     if (generation !== statusGeneration.current) return;
     if (response.status === 401) {
@@ -206,7 +209,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     if (selected) {
       const cached = readCachedStatus(selected.vin);
       if (cached) setTelemetry(cached);
-      await loadStatus(selected.vin, selected.carType);
+      await loadStatus(selected.vin, selected.carType, selected.backend);
     }
     setLoading(false);
   }, [loadStatus]);
@@ -219,7 +222,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     if (!vehicle) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible" && !pendingRef.current) {
-        void loadStatus(vehicle.vin, vehicle.carType);
+        void loadStatus(vehicle.vin, vehicle.carType, vehicle.backend);
       }
     }, 18000);
     return () => window.clearInterval(timer);
@@ -228,7 +231,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!vehicle) return;
     const refreshIfVisible = () => {
-      if (document.visibilityState === "visible" && !pendingRef.current) void loadStatus(vehicle.vin, vehicle.carType);
+      if (document.visibilityState === "visible" && !pendingRef.current) void loadStatus(vehicle.vin, vehicle.carType, vehicle.backend);
     };
     document.addEventListener("visibilitychange", refreshIfVisible);
     window.addEventListener("focus", refreshIfVisible);
@@ -250,7 +253,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vin }),
       });
-      await loadStatus(vin, next.carType);
+      await loadStatus(vin, next.carType, next.backend);
     },
     [loadStatus, vehicles],
   );
@@ -290,21 +293,22 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
           setTelemetry(data.telemetry);
           writeCachedStatus(data.telemetry);
         } else {
-          await loadStatus(targetVin, targetCarType);
+          await loadStatus(targetVin, targetCarType, vehicle.backend);
         }
         setCommandFailed(false);
         setCommandNote(data.message ?? "Command sent");
 
         // 2. Multi-stage verification polling across all tabs
         // Vehicle TCU processes commands over cellular connection; verifying in stages ensures the updated physical state is confirmed.
+        const targetBackend = vehicle.backend;
         const t1 = window.setTimeout(() => {
-          void loadStatus(targetVin, targetCarType);
+          void loadStatus(targetVin, targetCarType, targetBackend);
         }, 1800);
         const t2 = window.setTimeout(() => {
-          void loadStatus(targetVin, targetCarType);
+          void loadStatus(targetVin, targetCarType, targetBackend);
         }, 4500);
         const t3 = window.setTimeout(() => {
-          void loadStatus(targetVin, targetCarType);
+          void loadStatus(targetVin, targetCarType, targetBackend);
         }, 8500);
         verificationTimers.current = [t1, t2, t3];
       } catch (error) {
@@ -334,7 +338,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refresh = useCallback(async () => {
-    if (vehicle) await loadStatus(vehicle.vin, vehicle.carType);
+    if (vehicle) await loadStatus(vehicle.vin, vehicle.carType, vehicle.backend);
   }, [loadStatus, vehicle]);
 
   const updatePlate = useCallback(

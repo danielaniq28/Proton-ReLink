@@ -88,6 +88,7 @@ export function vehicleFromLegacy(raw: unknown): Vehicle | null {
     imageUrl: pickImage(record),
     carType: extractCarType(modelName, seriesName, matName, str(record.modelCode), str(record.vehicleName)),
     isDefault: record.isDefault === true,
+    backend: "ecarx",
   };
 }
 
@@ -114,6 +115,7 @@ export function vehicleFromAtlas(raw: unknown): Vehicle | null {
     imageUrl: pickImage(record),
     carType: extractCarType(modelName, vehicleName, matName, str(record.modelCode)),
     isDefault: record.isDefault === true,
+    backend: "atlas",
   };
 }
 
@@ -164,29 +166,17 @@ function kpa(value: unknown): number | null {
   return Math.round(parsed);
 }
 
-export function telemetryFromPayloads(
+export function telemetryFromAtlas(
   vin: string,
-  legacy: unknown,
   atlas: unknown,
   fallback: Telemetry,
   carType = "",
 ): Telemetry {
-  const legacyRoot = asRecord(legacy);
-  const legacyStatus = asRecord(legacyRoot?.vehicleStatus) ?? legacyRoot;
-  const basic = asRecord(legacyStatus?.basicVehicleStatus);
-  const additional = asRecord(legacyStatus?.additionalVehicleStatus);
-  const running = asRecord(additional?.runningStatus);
-  const maintenance = asRecord(additional?.maintenanceStatus);
-  const climate = asRecord(additional?.climateStatus);
-  const position = asRecord(basic?.position);
   const atlasStatus = asRecord(atlas) ?? {};
+  const next: Telemetry = { ...fallback, vin, source: "live", backend: "atlas", updatedAt: Date.now() };
 
-  const next: Telemetry = { ...fallback, vin, source: "live", updatedAt: Date.now() };
-
-  if (atlasStatus.engineStatus != null) next.engineOn = String(atlasStatus.engineStatus) === "0";
-  else {
-    const engine = flagOn(basic?.engineStatus);
-    if (engine != null) next.engineOn = engine;
+  if (atlasStatus.engineStatus != null) {
+    next.engineOn = String(atlasStatus.engineStatus) === "0";
   }
 
   const lockFields = [
@@ -195,17 +185,17 @@ export function telemetryFromPayloads(
     atlasStatus.doorLockStatusLeftRear,
     atlasStatus.doorLockStatusRightRear,
   ];
-  if (lockFields.some((value) => value != null)) next.locked = lockFields.every(doorIsLocked);
+  if (lockFields.some((value) => value != null)) {
+    next.locked = lockFields.every(doorIsLocked);
+  }
 
   const trunk = hatchOpen(atlasStatus.trunkOpenStatus);
   if (trunk != null) next.trunkOpen = trunk;
   const hood = hatchOpen(atlasStatus.engineHoodOpenStatus);
   if (hood != null) next.hoodOpen = hood;
 
-  if (atlasStatus.preClimateActive != null) next.climateOn = atlasStatus.preClimateActive === "true";
-  else {
-    const climateOn = flagOn(climate?.preClimateActive);
-    if (climateOn != null) next.climateOn = climateOn;
+  if (atlasStatus.preClimateActive != null) {
+    next.climateOn = atlasStatus.preClimateActive === "true" || atlasStatus.preClimateActive === true || atlasStatus.preClimateActive === "1";
   }
 
   const panes = [
@@ -215,6 +205,7 @@ export function telemetryFromPayloads(
     paneOpen(atlasStatus.winStatusRightRear),
   ].filter((value): value is boolean => value != null);
   if (panes.length) next.windowsOpen = panes.some(Boolean);
+
   const winPositions = [
     num(atlasStatus.winPosLeftFront),
     num(atlasStatus.winPosLeftRear),
@@ -226,7 +217,7 @@ export function telemetryFromPayloads(
     next.windowsVent = ventCode === 1 || (winPositions.length === 4 && winPositions.every((value) => value === 8));
   }
 
-  const litres = num(atlasStatus.fuelLevel) ?? num(running?.fuelLevel);
+  const litres = num(atlasStatus.fuelLevel);
   if (litres != null) {
     next.fuelLitres = litres;
     const tank = FUEL_TANKS[carType];
@@ -236,47 +227,47 @@ export function telemetryFromPayloads(
   const voltage = num(atlasStatus.voltage);
   if (voltage != null) next.batteryVoltage = voltage;
 
-  const range = num(atlasStatus.distanceToEmpty) ?? num(basic?.distanceToEmpty);
+  const range = num(atlasStatus.distanceToEmpty);
   if (range != null) next.rangeKm = Math.round(range);
 
-  const efficiency = num(atlasStatus.aveFuelConsumption) ?? num(running?.aveFuelConsumption);
+  const efficiency = num(atlasStatus.aveFuelConsumption);
   if (efficiency != null) next.efficiencyLPer100 = Math.round(efficiency * 10) / 10;
 
-  const odo = num(atlasStatus.odometer) ?? num(maintenance?.odometer);
+  const odo = num(atlasStatus.odometer);
   if (odo != null) next.odometerKm = Math.round(odo);
 
-  const speed = num(atlasStatus.speed) ?? num(basic?.speed);
+  const speed = num(atlasStatus.speed);
   if (speed != null) next.speedKmh = Math.round(speed);
 
-  const serviceKm = num(atlasStatus.distanceToService) ?? num(maintenance?.distanceToService);
+  const serviceKm = num(atlasStatus.distanceToService);
   if (serviceKm != null) next.serviceKm = Math.round(serviceKm);
   const serviceDays = num(atlasStatus.daysToService);
   if (serviceDays != null) next.serviceDays = Math.round(serviceDays);
 
-  const interior = num(atlasStatus.interiorTemp) ?? num(climate?.interiorTemp);
+  const interior = num(atlasStatus.interiorTemp);
   if (interior != null) next.interiorTemp = Math.round(interior);
-  const exterior = num(atlasStatus.exteriorTemp) ?? num(climate?.exteriorTemp);
+  const exterior = num(atlasStatus.exteriorTemp);
   if (exterior != null) next.exteriorTemp = Math.round(exterior);
   const acTemp = num(atlasStatus.airConditionTemperature);
   if (acTemp != null) next.targetTemp = Math.round(acTemp);
 
   const coolantValidity = atlasStatus.engineCoolantTemperatureValidity;
-  const coolant = num(atlasStatus.engineCoolantTemperature) ?? num(running?.engineCoolantTemperature);
-  if (coolant != null && String(coolantValidity ?? "1") !== "0") next.coolantC = Math.round(coolant);
-  const oil = flagOn(running?.engineOilPressureWarning);
-  if (oil != null) next.oilOk = !oil;
+  const coolant = num(atlasStatus.engineCoolantTemperature);
+  if (coolant != null && String(coolantValidity ?? "1") !== "0") {
+    next.coolantC = Math.round(coolant);
+  }
 
-  const lat = num(atlasStatus.latitude) ?? num(position?.latitude);
-  const lng = num(atlasStatus.longitude) ?? num(position?.longitude);
+  const lat = num(atlasStatus.latitude);
+  const lng = num(atlasStatus.longitude);
   if (lat != null && lng != null && Math.abs(lat) > 0.01 && Math.abs(lng) > 0.01) {
     next.latitude = lat;
     next.longitude = lng;
     next.place = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
   }
-  const heading = num(atlasStatus.direction) ?? num(basic?.direction);
+  const heading = num(atlasStatus.direction);
   if (heading != null) next.heading = heading;
 
-  const updated = num(atlasStatus.updateTime) ?? num(legacyStatus?.updateTime);
+  const updated = num(atlasStatus.updateTime);
   if (updated != null) next.updatedAt = updated > 10_000_000_000 ? updated : updated * 1000;
 
   const corners: Array<["fl" | "fr" | "rl" | "rr", string, string, string]> = [
@@ -285,21 +276,14 @@ export function telemetryFromPayloads(
     ["rl", "tyreStatusLeftRear", "tyreTempLeftRear", "tyrePreWarningLeftRear"],
     ["rr", "tyreStatusRightRear", "tyreTempRightRear", "tyrePreWarningRightRear"],
   ];
-  const legacyCorners: Record<string, [string, string, string]> = {
-    fl: ["tyreStatusDriver", "tyreTempDriver", "tyrePreWarningDriver"],
-    fr: ["tyreStatusPassenger", "tyreTempPassenger", "tyrePreWarningPassenger"],
-    rl: ["tyreStatusDriverRear", "tyreTempDriverRear", "tyrePreWarningDriverRear"],
-    rr: ["tyreStatusPassengerRear", "tyreTempPassengerRear", "tyrePreWarningPassengerRear"],
-  };
   for (const [key, pressureKey, tempKey, warnKey] of corners) {
-    const pressure = kpa(atlasStatus[pressureKey]) ?? kpa(maintenance?.[legacyCorners[key][0]]);
-    const temp = num(atlasStatus[tempKey]) ?? num(maintenance?.[legacyCorners[key][1]]);
+    const pressure = kpa(atlasStatus[pressureKey]);
+    const temp = num(atlasStatus[tempKey]);
     const warningCode = num(atlasStatus[warnKey]);
-    const warning = warningCode != null ? warningCode !== 0 : flagOn(maintenance?.[legacyCorners[key][2]]);
-    const live = Object.keys(atlasStatus).length > 0;
+    const warning = warningCode != null ? warningCode !== 0 : undefined;
     next.tires[key] = {
       pressureKpa: pressure ?? next.tires[key].pressureKpa,
-      tempC: temp != null ? Math.round(temp) : live ? null : next.tires[key].tempC,
+      tempC: temp != null ? Math.round(temp) : next.tires[key].tempC,
       warning: warning ?? next.tires[key].warning,
     };
   }
@@ -316,6 +300,119 @@ export function telemetryFromPayloads(
   }
 
   return next;
+}
+
+export function telemetryFromEcarx(
+  vin: string,
+  legacy: unknown,
+  fallback: Telemetry,
+  carType = "",
+): Telemetry {
+  const legacyRoot = asRecord(legacy);
+  const legacyStatus = asRecord(legacyRoot?.vehicleStatus) ?? legacyRoot;
+  const basic = asRecord(legacyStatus?.basicVehicleStatus);
+  const additional = asRecord(legacyStatus?.additionalVehicleStatus);
+  const running = asRecord(additional?.runningStatus);
+  const maintenance = asRecord(additional?.maintenanceStatus);
+  const climate = asRecord(additional?.climateStatus);
+  const position = asRecord(basic?.position);
+
+  const next: Telemetry = { ...fallback, vin, source: "live", backend: "ecarx", updatedAt: Date.now() };
+
+  const engine = flagOn(basic?.engineStatus);
+  if (engine != null) next.engineOn = engine;
+
+  const lock = flagOn(basic?.lockStatus);
+  if (lock != null) next.locked = lock;
+
+  const trunk = flagOn(basic?.trunkStatus);
+  if (trunk != null) next.trunkOpen = trunk;
+  const hood = flagOn(basic?.hoodStatus);
+  if (hood != null) next.hoodOpen = hood;
+
+  const climateOn = flagOn(climate?.preClimateActive);
+  if (climateOn != null) next.climateOn = climateOn;
+  const acTemp = num(climate?.airConditionTemperature);
+  if (acTemp != null) next.targetTemp = Math.round(acTemp);
+
+  const litres = num(running?.fuelLevel);
+  if (litres != null) {
+    next.fuelLitres = litres;
+    const tank = FUEL_TANKS[carType];
+    if (tank) next.fuelPercent = Math.max(0, Math.min(100, Math.round((litres / tank) * 100)));
+  }
+
+  const range = num(basic?.distanceToEmpty);
+  if (range != null) next.rangeKm = Math.round(range);
+
+  const efficiency = num(running?.aveFuelConsumption);
+  if (efficiency != null) next.efficiencyLPer100 = Math.round(efficiency * 10) / 10;
+
+  const odo = num(maintenance?.odometer);
+  if (odo != null) next.odometerKm = Math.round(odo);
+
+  const speed = num(basic?.speed);
+  if (speed != null) next.speedKmh = Math.round(speed);
+
+  const serviceKm = num(maintenance?.distanceToService);
+  if (serviceKm != null) next.serviceKm = Math.round(serviceKm);
+
+  const interior = num(climate?.interiorTemp);
+  if (interior != null) next.interiorTemp = Math.round(interior);
+  const exterior = num(climate?.exteriorTemp);
+  if (exterior != null) next.exteriorTemp = Math.round(exterior);
+
+  const coolant = num(running?.engineCoolantTemperature);
+  if (coolant != null) next.coolantC = Math.round(coolant);
+  const oil = flagOn(running?.engineOilPressureWarning);
+  if (oil != null) next.oilOk = !oil;
+
+  const lat = num(position?.latitude);
+  const lng = num(position?.longitude);
+  if (lat != null && lng != null && Math.abs(lat) > 0.01 && Math.abs(lng) > 0.01) {
+    next.latitude = lat;
+    next.longitude = lng;
+    next.place = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
+  const heading = num(basic?.direction);
+  if (heading != null) next.heading = heading;
+
+  const updated = num(legacyStatus?.updateTime);
+  if (updated != null) next.updatedAt = updated > 10_000_000_000 ? updated : updated * 1000;
+
+  const legacyCorners: Record<"fl" | "fr" | "rl" | "rr", [string, string, string]> = {
+    fl: ["tyreStatusDriver", "tyreTempDriver", "tyrePreWarningDriver"],
+    fr: ["tyreStatusPassenger", "tyreTempPassenger", "tyrePreWarningPassenger"],
+    rl: ["tyreStatusDriverRear", "tyreTempDriverRear", "tyrePreWarningDriverRear"],
+    rr: ["tyreStatusPassengerRear", "tyreTempPassengerRear", "tyrePreWarningPassengerRear"],
+  };
+  for (const cornerKey of ["fl", "fr", "rl", "rr"] as const) {
+    const [pressureKey, tempKey, warnKey] = legacyCorners[cornerKey];
+    const pressure = kpa(maintenance?.[pressureKey]);
+    const temp = num(maintenance?.[tempKey]);
+    const warning = flagOn(maintenance?.[warnKey]);
+    next.tires[cornerKey] = {
+      pressureKpa: pressure ?? next.tires[cornerKey].pressureKpa,
+      tempC: temp != null ? Math.round(temp) : next.tires[cornerKey].tempC,
+      warning: warning ?? next.tires[cornerKey].warning,
+    };
+  }
+
+  return next;
+}
+
+export function telemetryFromPayloads(
+  vin: string,
+  legacy: unknown,
+  atlas: unknown,
+  fallback: Telemetry,
+  carType = "",
+  backend: "atlas" | "ecarx" = "atlas",
+): Telemetry {
+  if (backend === "ecarx") {
+    return telemetryFromEcarx(vin, legacy, fallback, carType);
+  }
+  return telemetryFromAtlas(vin, atlas, fallback, carType);
 }
 
 export function listFromEnvelope(payload: unknown): unknown[] {

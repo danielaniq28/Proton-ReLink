@@ -28,6 +28,7 @@ export function mockVehicles(): Vehicle[] {
       imageUrl: null,
       carType: "X70",
       isDefault: true,
+      backend: "atlas",
     },
     {
       vin: "DEMOS70PROTON0002",
@@ -44,6 +45,7 @@ export function mockVehicles(): Vehicle[] {
       imageUrl: null,
       carType: "S70",
       isDefault: false,
+      backend: "atlas",
     },
     {
       vin: "DEMOX50PROTON0003",
@@ -60,6 +62,7 @@ export function mockVehicles(): Vehicle[] {
       imageUrl: null,
       carType: "X50",
       isDefault: false,
+      backend: "ecarx",
     },
     {
       vin: "DEMOX90PROTON0004",
@@ -76,6 +79,7 @@ export function mockVehicles(): Vehicle[] {
       imageUrl: null,
       carType: "X90",
       isDefault: false,
+      backend: "atlas",
     },
   ];
 }
@@ -140,6 +144,7 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
     vin: vehicle.vin,
     updatedAt: now(),
     source: "mock",
+    backend: vehicle.backend || "atlas",
     engineOn: false,
     locked: true,
     trunkOpen: false,

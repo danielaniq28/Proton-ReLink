@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "crypto";
-import { listFromEnvelope, mergeVehicles, objectFromEnvelope, vehicleFromAtlas, vehicleFromLegacy } from "./normalize";
+import { listFromEnvelope, objectFromEnvelope, vehicleFromAtlas, vehicleFromLegacy } from "./normalize";
 import { clampClimateMinutes } from "./mock";
-import type { ApiEnvelope, ControlAction, LoginEntity, Session, Vehicle } from "./types";
+import type { ApiEnvelope, ControlAction, LoginEntity, Session, TelemetryBackend, Vehicle } from "./types";
 
 const LEGACY = process.env.PROTON_LEGACY_BASE ?? "https://app.acotech.my:8443";
 const ATLAS = process.env.PROTON_ATLAS_BASE ?? "https://app-atlas.acotech.my:8443";
@@ -186,35 +186,55 @@ async function graphicFor(session: Session, vehicle: Vehicle): Promise<string | 
 }
 
 export async function fetchVehicles(session: Session): Promise<Vehicle[]> {
-  const [legacy, atlas] = await Promise.allSettled([legacyVehicles(session), atlasVehicles(session)]);
-  const legacyList = legacy.status === "fulfilled" ? legacy.value : [];
-  const atlasList = atlas.status === "fulfilled" ? atlas.value : [];
-  if (!legacyList.length && !atlasList.length) {
-    const reason =
-      legacy.status === "rejected"
-        ? legacy.reason instanceof Error
-          ? legacy.reason.message
-          : "Vehicle list failed"
-        : "No vehicles were returned";
-    throw new ProtonError(reason);
+  // If the account/vehicle has compatibility with newer ACO Tech / ATLAS, use that one.
+  // If one only supports legacy ECARX, use that one. Do not implement both and merge.
+  let list: Vehicle[] = [];
+  let backendUsed: TelemetryBackend = "atlas";
+
+  try {
+    const atlasList = await atlasVehicles(session);
+    if (atlasList && atlasList.length > 0) {
+      list = atlasList;
+      backendUsed = "atlas";
+    }
+  } catch {
+    // ATLAS not supported or unavailable for this vehicle
   }
-  const merged = mergeVehicles(atlasList, legacyList);
+
+  if (list.length === 0) {
+    try {
+      const legacyList = await legacyVehicles(session);
+      if (legacyList && legacyList.length > 0) {
+        list = legacyList;
+        backendUsed = "ecarx";
+      }
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "Vehicle list failed";
+      throw new ProtonError(reason);
+    }
+  }
+
+  if (list.length === 0) {
+    throw new ProtonError("No vehicles were returned for your account");
+  }
+
   const withArt = await Promise.all(
-    merged.map(async (vehicle) => ({
+    list.map(async (vehicle) => ({
       ...vehicle,
+      backend: backendUsed,
       imageUrl: await graphicFor(session, vehicle),
     })),
   );
   return withArt;
 }
 
-export async function fetchStatusPayloads(session: Session, vin: string): Promise<{ legacy: unknown; atlas: unknown }> {
-  const [atlasResult, legacyResult] = await Promise.allSettled([
-    callProton(ATLAS, "/iot/function/getVehicleStatus", session, {
-      method: "POST",
-      body: JSON.stringify({ vin }),
-    }),
-    callProton(
+export async function fetchStatusPayloads(
+  session: Session,
+  vin: string,
+  backend: TelemetryBackend = "atlas",
+): Promise<{ legacy: unknown; atlas: unknown }> {
+  if (backend === "ecarx") {
+    const legacy = await callProton(
       LEGACY,
       `/app/v1/vehicle/realtimeData?${new URLSearchParams({
         userId: session.userId,
@@ -223,19 +243,15 @@ export async function fetchStatusPayloads(session: Session, vin: string): Promis
         appId: "protonlink_01",
       }).toString()}`,
       session,
-    ),
-  ]);
-
-  const atlas = atlasResult.status === "fulfilled" ? objectFromEnvelope(atlasResult.value) : null;
-  const legacy = legacyResult.status === "fulfilled" ? objectFromEnvelope(legacyResult.value) : null;
-
-  if (!atlas && !legacy) {
-    if (atlasResult.status === "rejected") throw atlasResult.reason;
-    if (legacyResult.status === "rejected") throw legacyResult.reason;
-    throw new ProtonError("Vehicle status unavailable");
+    );
+    return { legacy: objectFromEnvelope(legacy), atlas: null };
   }
 
-  return { legacy, atlas };
+  const atlas = await callProton(ATLAS, "/iot/function/getVehicleStatus", session, {
+    method: "POST",
+    body: JSON.stringify({ vin }),
+  });
+  return { legacy: null, atlas: objectFromEnvelope(atlas) };
 }
 
 export async function sendCommand(

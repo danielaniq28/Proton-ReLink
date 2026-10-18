@@ -25,8 +25,9 @@ export async function GET() {
       vehicles.find((vehicle) => vehicle.vin === session.selectedVin)?.vin ??
       vehicles.find((vehicle) => vehicle.isDefault)?.vin ??
       vehicles[0]?.vin;
-    if (selected && selected !== session.selectedVin) {
-      await writeSession({ ...session, selectedVin: selected });
+    const backend = vehicles.find((vehicle) => vehicle.vin === selected)?.backend ?? vehicles[0]?.backend;
+    if (selected && (selected !== session.selectedVin || backend !== session.backend)) {
+      await writeSession({ ...session, selectedVin: selected, backend });
     }
     return NextResponse.json({ demo: false, vehicles, selectedVin: selected ?? null, warning: null });
   } catch (error) {

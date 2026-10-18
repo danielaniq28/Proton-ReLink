@@ -6,6 +6,8 @@ export type LoginEntity = {
   clientId?: string;
 };
 
+export type TelemetryBackend = "atlas" | "ecarx";
+
 export type Vehicle = {
   vin: string;
   modelCode: string;
@@ -21,6 +23,7 @@ export type Vehicle = {
   imageUrl: string | null;
   carType: string;
   isDefault: boolean;
+  backend: TelemetryBackend;
 };
 
 export type TireCorner = {
@@ -33,6 +36,7 @@ export type Telemetry = {
   vin: string;
   updatedAt: number;
   source: "live" | "mock";
+  backend: TelemetryBackend;
   engineOn: boolean;
   locked: boolean;
   trunkOpen: boolean;
@@ -89,6 +93,7 @@ export type Session = {
   expiresIn?: string;
   demo: boolean;
   selectedVin?: string;
+  backend?: TelemetryBackend;
 };
 
 export type ApiEnvelope = {
