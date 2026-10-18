@@ -282,8 +282,8 @@ function Frame() {
         {signingOut ? <SignOutSplash key="signout-splash" /> : null}
       </AnimatePresence>
 
-      <div className={`min-h-screen bg-[#08080a] text-zinc-100 ${(path === "/dashboard/controls" || path === "/dashboard/climate") ? "h-dvh max-h-dvh overflow-hidden md:h-auto md:max-h-none md:overflow-visible" : ""}`}>
-        <div className={`flex min-h-screen w-full flex-col md:flex-row ${(path === "/dashboard/controls" || path === "/dashboard/climate") ? "h-dvh max-h-dvh md:h-auto md:max-h-none" : ""}`}>
+      <div className="min-h-screen bg-[#08080a] text-zinc-100">
+        <div className="flex min-h-screen w-full flex-col md:flex-row">
           <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-6 md:flex">
             <img src="/da-mark.png" alt="Proton Re-Link" className="mb-10 h-auto w-[55%] max-w-[2.75rem] object-contain" />
             <nav className="flex w-full flex-1 flex-col items-center gap-2 px-1.5">
@@ -418,7 +418,7 @@ function Frame() {
             </div>
           ) : null}
 
-          <div className={`flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10 ${(path === "/dashboard/controls" || path === "/dashboard/climate") ? "overflow-hidden" : ""}`}>
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               <DashboardPanels />
             </div>

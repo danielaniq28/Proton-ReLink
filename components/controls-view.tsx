@@ -190,20 +190,11 @@ export function ControlsView() {
               <motion.button
                 key={item.id}
                 type="button"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.22,
-                  delay: index * 0.03,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
                 whileTap={{ scale: 0.98 }}
                 disabled={pendingAction != null}
                 onClick={() => handleAction(item)}
-                className={`group relative flex min-h-[114px] sm:min-h-[128px] flex-col justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-left text-white transition-all hover:border-white/[0.16] hover:bg-white/[0.07] active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm ${
-                  isLastOdd
-                    ? "col-span-2 justify-self-center mx-auto w-full max-w-[calc(50%-5px)] sm:max-w-[calc(50%-7px)] lg:col-span-1 lg:max-w-none"
-                    : ""
+                className={`group relative flex min-h-[114px] sm:min-h-[128px] flex-col justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-left text-white transition-colors duration-150 hover:border-white/[0.16] hover:bg-white/[0.07] disabled:opacity-50 cursor-pointer shadow-sm ${
+                  isLastOdd ? "col-span-2 sm:col-span-1 lg:col-span-1" : ""
                 }`}
               >
                 <div className="flex w-full items-center justify-between">
@@ -215,12 +206,8 @@ export function ControlsView() {
                       <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                     ) : item.statusDot ? (
                       <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5">
-                        <motion.span
-                          key={`${item.id}-${item.statusDot}`}
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors ${
                             item.statusDot === "green"
                               ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
                               : "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.5)]"
@@ -234,18 +221,9 @@ export function ControlsView() {
                   </div>
                 </div>
                 <div className="w-full min-w-0 mt-2">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={item.label}
-                      initial={{ opacity: 0, y: 2 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -2 }}
-                      transition={{ duration: 0.15 }}
-                      className="block truncate text-sm sm:text-base font-semibold tracking-tight text-white leading-tight"
-                    >
-                      {item.label}
-                    </motion.span>
-                  </AnimatePresence>
+                  <span className="block truncate text-sm sm:text-base font-semibold tracking-tight text-white leading-tight">
+                    {item.label}
+                  </span>
                   <span className="block truncate text-xs text-zinc-400 mt-0.5">
                     {sending ? "Sending…" : item.detail}
                   </span>

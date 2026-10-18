@@ -1,4 +1,5 @@
 import { extractCarType } from "./car-type";
+import { resolveProtonColorName } from "./color";
 import type { Telemetry, Vehicle } from "./types";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -73,6 +74,15 @@ export function vehicleFromLegacy(raw: unknown): Vehicle | null {
   const modelName = str(record.modelName);
   const seriesName = str(record.seriesName);
   const matName = str(record.matName);
+  const carType = extractCarType(modelName, seriesName, matName, str(record.modelCode), str(record.vehicleName));
+  const rawColor =
+    str(record.userColorName) ||
+    str(record.colorName) ||
+    str(record.bodyColorName) ||
+    str(record.bodyColorCode) ||
+    str(record.colorCode);
+  const colorName = resolveProtonColorName(rawColor, carType);
+
   return {
     vin,
     modelCode: str(record.modelCode),
@@ -84,9 +94,9 @@ export function vehicleFromLegacy(raw: unknown): Vehicle | null {
     topColorCode: str(record.topColorCode),
     vehicleName: str(record.vehicleName) || modelName || seriesName,
     plate: extractPlate(record),
-    colorName: str(record.userColorName) || str(record.colorName),
+    colorName,
     imageUrl: pickImage(record),
-    carType: extractCarType(modelName, seriesName, matName, str(record.modelCode), str(record.vehicleName)),
+    carType,
     isDefault: record.isDefault === true,
     backend: "ecarx",
   };
@@ -100,6 +110,14 @@ export function vehicleFromAtlas(raw: unknown): Vehicle | null {
   const modelName = str(record.modelName);
   const vehicleName = str(record.vehicleName);
   const matName = str(record.matName);
+  const carType = extractCarType(modelName, vehicleName, matName, str(record.modelCode));
+  const rawColor =
+    str(record.userColorName) ||
+    str(record.colorName) ||
+    str(record.bodyColorName) ||
+    str(record.bodyColorCode);
+  const colorName = resolveProtonColorName(rawColor, carType);
+
   return {
     vin,
     modelCode: str(record.modelCode),
@@ -111,9 +129,9 @@ export function vehicleFromAtlas(raw: unknown): Vehicle | null {
     topColorCode: str(record.topColorCode),
     vehicleName: vehicleName || modelName,
     plate: extractPlate(record),
-    colorName: str(record.bodyColorCode),
+    colorName,
     imageUrl: pickImage(record),
-    carType: extractCarType(modelName, vehicleName, matName, str(record.modelCode)),
+    carType,
     isDefault: record.isDefault === true,
     backend: "atlas",
   };

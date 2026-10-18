@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
-    "build": "NODE_ENV=production next build",
-    "start": "next start",
+    "build": "BUILD_DIR=.next_build next build",
+    "start": "BUILD_DIR=.next_build next start",
     "lint": "rm -f tsconfig.tsbuildinfo && tsc --noEmit"
   },
   "dependencies": {

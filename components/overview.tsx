@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, ChevronRight, Fan, LocateFixed, SlidersHorizontal } from "lucide-react";
+import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
 import { formatNumber } from "@/lib/format";
+import { resolveProtonColorName } from "@/lib/color";
 import { useVehicle } from "./vehicle-provider";
 
 function getMaxTankCapacity(carType: string): number {
@@ -82,7 +83,9 @@ export function Overview() {
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="truncate text-[11px] tracking-[0.16em] text-zinc-400 uppercase font-semibold">{vehicle.colorName || "Proton"}</p>
+              <p className="truncate text-[11px] tracking-[0.16em] text-zinc-400 uppercase font-semibold">
+                {resolveProtonColorName(vehicle.colorName, vehicle.carType) || "Proton"}
+              </p>
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
                   (telemetry.backend || vehicle.backend) === "atlas"
@@ -105,16 +108,27 @@ export function Overview() {
           </div>
           <div className="relative shrink-0">
             <FuelArc percent={telemetry.fuelPercent} rangeKm={telemetry.rangeKm} />
-            <div className="absolute inset-0 flex flex-col items-center justify-center pt-3 sm:pt-4">
-              <motion.span
-                className="text-2xl font-semibold tracking-tight sm:text-3xl"
-                animate={tone.level === "ok" ? { opacity: 1, color: tone.color } : { opacity: [1, 0.4, 1], color: tone.color }}
-                transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                {telemetry.rangeKm}
-              </motion.span>
-              <span className="text-[11px] tracking-widest uppercase" style={{ color: tone.level === "ok" ? "#71717a" : tone.color }}>
-                km
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-1.5 sm:pb-2.5">
+              <div className="flex items-baseline gap-0.5">
+                <motion.span
+                  className="text-xl font-bold tracking-tight sm:text-2xl"
+                  animate={tone.level === "ok" ? { opacity: 1, color: tone.color } : { opacity: [1, 0.4, 1], color: tone.color }}
+                  transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  {telemetry.rangeKm}
+                </motion.span>
+                <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: tone.level === "ok" ? "#71717a" : tone.color }}>
+                  km
+                </span>
+              </div>
+              <div className="mt-0.5 sm:mt-1 flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 backdrop-blur-sm shadow-sm">
+                <Fuel className={`h-2.5 w-2.5 shrink-0 ${fuelPercent <= 15 ? "text-rose-400" : fuelPercent <= 25 ? "text-amber-400" : "text-zinc-400"}`} />
+                <span className={`text-[10px] sm:text-[11px] font-semibold tabular-nums ${fuelPercent <= 15 ? "text-rose-300" : fuelPercent <= 25 ? "text-amber-300" : "text-zinc-200"}`}>
+                  {Math.round(fuelPercent)}%
+                </span>
+              </div>
+              <span className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] font-medium tracking-tight text-zinc-400 tabular-nums">
+                {currentFuelLitres.toFixed(currentFuelLitres % 1 === 0 ? 0 : 1)}/{maxTankLitres}L
               </span>
             </div>
           </div>

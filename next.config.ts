@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  distDir: process.env.BUILD_DIR || ".next",
   poweredByHeader: false,
   devIndicators: false,
   images: { unoptimized: true },

@@ -20,16 +20,16 @@ export function DashboardPanels() {
   const { path } = useDashboardNav();
 
   return (
-    <AnimatePresence mode="popLayout" initial={false}>
+    <AnimatePresence mode="wait" initial={false}>
       {PANELS.map(({ href, View }) => {
         if (href !== path) return null;
         return (
           <motion.div
             key={href}
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.14, ease: "easeOut" }}
             className="w-full flex-1 flex flex-col min-h-0"
           >
             <View />
