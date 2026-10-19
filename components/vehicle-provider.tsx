@@ -22,6 +22,7 @@ type GarageResponse = {
   warning: string | null;
   demo: boolean;
   fallback?: boolean;
+  error?: string;
 };
 
 type StatusResponse = {
@@ -192,19 +193,27 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   const loadGarage = useCallback(async () => {
     try {
       const response = await fetch("/api/vehicles", { cache: "no-store" });
-      if (response.status === 401 || !response.ok) {
+      if (response.status === 401) {
         try {
           window.localStorage.removeItem(STATUS_CACHE);
         } catch {}
-        window.location.href = "/login?signout=1&error=no_vehicles";
+        window.location.href = "/login?signout=1";
+        return;
+      }
+      if (!response.ok) {
+        setWarning("Temporarily unable to reach Proton services. Reconnecting…");
         return;
       }
       const data = (await response.json()) as GarageResponse;
       if (!data?.vehicles || data.vehicles.length === 0 || (data.fallback && !data.demo)) {
-        try {
-          window.localStorage.removeItem(STATUS_CACHE);
-        } catch {}
-        window.location.href = "/login?signout=1&error=no_vehicles";
+        if (response.status === 404 && data?.error === "no_vehicles") {
+          try {
+            window.localStorage.removeItem(STATUS_CACHE);
+          } catch {}
+          window.location.href = "/login?signout=1&error=no_vehicles";
+          return;
+        }
+        setWarning("No vehicles currently returned by Proton gateway.");
         return;
       }
       const resolvedVehicles = data.vehicles.map((v) => {

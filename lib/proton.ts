@@ -44,11 +44,49 @@ function succeeded(payload: ApiEnvelope | null): boolean {
   return payload.originData != null || payload.data != null;
 }
 
+export async function refreshProtonToken(session: Session): Promise<Session | null> {
+  if (!session.refreshToken || !session.userId) return null;
+  try {
+    const payload = await callProton(
+      LEGACY,
+      "/app/v1/member/tokenRefresh",
+      null,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          userId: session.userId,
+          refreshToken: session.refreshToken,
+          clientType: "phone",
+          deviceId: DEVICE_ID,
+        }),
+      },
+      true,
+    );
+
+    const bag = (payload?.originData ?? payload?.data ?? payload) as Record<string, unknown> | null;
+    const accessToken = typeof bag?.accessToken === "string" ? bag.accessToken : typeof bag?.token === "string" ? bag.token : "";
+    if (!accessToken || !succeeded(payload)) {
+      return null;
+    }
+
+    const updated: Session = {
+      ...session,
+      accessToken,
+      refreshToken: typeof bag?.refreshToken === "string" ? bag.refreshToken : session.refreshToken,
+      expiresIn: bag?.expiresIn != null ? String(bag.expiresIn) : session.expiresIn,
+    };
+    return updated;
+  } catch {
+    return null;
+  }
+}
+
 async function callProton(
   base: string,
   path: string,
   session: Session | null,
   init: RequestInit = {},
+  isRetry = false,
 ): Promise<ApiEnvelope | null> {
   const headers = new Headers(init.headers);
   const atlas = base.includes("app-atlas");
@@ -103,6 +141,33 @@ async function callProton(
       payload = { msg: text.slice(0, 180) };
     }
   }
+
+  const isAuthError =
+    response.status === 401 ||
+    payload?.code === 401 ||
+    payload?.code === "401" ||
+    payload?.code === 40001 ||
+    payload?.code === "40001";
+
+  // Transparently refresh expired tokens and retry the request
+  if (isAuthError && !isRetry && session?.refreshToken) {
+    const refreshed = await refreshProtonToken(session);
+    if (refreshed?.accessToken) {
+      session.accessToken = refreshed.accessToken;
+      if (refreshed.refreshToken) session.refreshToken = refreshed.refreshToken;
+      if (refreshed.expiresIn) session.expiresIn = refreshed.expiresIn;
+
+      try {
+        const { writeSession } = await import("./session");
+        await writeSession(session);
+      } catch {
+        /* Session persistence if within request context */
+      }
+
+      return callProton(base, path, session, init, true);
+    }
+  }
+
   if (!response.ok && !succeeded(payload)) {
     throw new ProtonError(messageOf(payload, `Gateway responded ${response.status}`), response.status);
   }

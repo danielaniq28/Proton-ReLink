@@ -38,14 +38,17 @@ export async function GET() {
     }
     return NextResponse.json({ demo: false, vehicles, selectedVin: selected ?? null, warning: null });
   } catch (error) {
-    await clearSession();
+    const isAuth = error instanceof ProtonError && error.status === 401;
+    if (isAuth) {
+      await clearSession();
+    }
     const message = error instanceof ProtonError ? error.message : "Vehicle list unavailable";
-    const status = error instanceof ProtonError && error.status === 401 ? 401 : 404;
+    const status = isAuth ? 401 : 502;
     return NextResponse.json(
       {
         message,
         vehicles: [],
-        error: "no_vehicles",
+        error: isAuth ? "unauthorized" : "gateway_error",
       },
       { status }
     );

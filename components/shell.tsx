@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { Activity, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
+import { Activity, Download, Fan, Gauge, LocateFixed, LogOut, SlidersHorizontal } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { DashboardNavProvider, useDashboardNav } from "./dashboard-nav";
 import { DashboardPanels } from "./dashboard-panels";
@@ -249,6 +249,17 @@ function Frame() {
   const { path, go } = useDashboardNav();
   const { vehicle, vehicles, telemetry, selectVehicle, demo, warning, refresh } = useVehicle();
   const [signingOut, setSigningOut] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const standalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone === true ||
+        document.referrer.startsWith("android-app://");
+      setIsStandalone(standalone);
+    }
+  }, []);
 
   // Automatically refresh vehicle status when switching across tabs
   const lastPathRef = useRef(path);
@@ -312,6 +323,22 @@ function Frame() {
                 );
               })}
             </nav>
+            {!isStandalone ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("pl_open_pwa_prompt"));
+                  }
+                }}
+                title="Install Proton Re-Link"
+                aria-label="Install App"
+                className="mx-1.5 mb-1.5 flex w-[calc(100%-0.75rem)] flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] tracking-wide text-zinc-400 uppercase hover:bg-white/5 hover:text-cyan-300 cursor-pointer transition-colors"
+              >
+                <Download className="h-4 w-4 text-cyan-400" />
+                <span>Install</span>
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={signingOut}
@@ -381,6 +408,23 @@ function Frame() {
 
               {/* 4. Compact Apple-style Action buttons */}
               <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                {!isStandalone ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("pl_open_pwa_prompt"));
+                      }
+                    }}
+                    title="Install Proton Re-Link"
+                    aria-label="Install App"
+                    className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 sm:px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer active:scale-95 shadow-sm"
+                  >
+                    <Download className="h-3 w-3 text-cyan-400" />
+                    <span className="hidden xs:inline">Install</span>
+                  </button>
+                ) : null}
+
                 <button
                   type="button"
                   disabled={signingOut}
