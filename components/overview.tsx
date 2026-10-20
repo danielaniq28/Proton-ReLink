@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal } from "lucide-react";
+import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal, X } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
@@ -83,7 +83,7 @@ export function Overview() {
     },
     { label: "Service in", value: `${formatNumber(telemetry.serviceKm)} km` },
   ];
-  const tone = rangeTone(telemetry.rangeKm);
+  const tone = rangeTone(telemetry.rangeKm, fuelPercent);
 
   return (
     <div className="flex w-full flex-col gap-4 sm:gap-6">
@@ -122,7 +122,7 @@ export function Overview() {
                 <motion.span
                   className="text-xl font-bold tracking-tight sm:text-2xl"
                   animate={tone.level === "ok" ? { opacity: 1, color: tone.color } : { opacity: [1, 0.4, 1], color: tone.color }}
-                  transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  transition={tone.level === "ok" ? { duration: 0.2 } : { duration: tone.blinkDuration, repeat: Infinity, ease: "easeInOut" }}
                 >
                   {telemetry.rangeKm}
                 </motion.span>
@@ -131,8 +131,8 @@ export function Overview() {
                 </span>
               </div>
               <div className="mt-0.5 sm:mt-1 flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 backdrop-blur-sm shadow-sm">
-                <Fuel className={`h-2.5 w-2.5 shrink-0 ${fuelPercent <= 15 ? "text-rose-400" : fuelPercent <= 25 ? "text-amber-400" : "text-zinc-400"}`} />
-                <span className={`text-[10px] sm:text-[11px] font-semibold tabular-nums ${fuelPercent <= 15 ? "text-rose-300" : fuelPercent <= 25 ? "text-amber-300" : "text-zinc-200"}`}>
+                <Fuel className={`h-2.5 w-2.5 shrink-0 ${fuelPercent <= 5 ? "text-red-400" : fuelPercent <= 15 ? "text-amber-400" : fuelPercent <= 25 ? "text-amber-400" : "text-zinc-400"}`} />
+                <span className={`text-[10px] sm:text-[11px] font-semibold tabular-nums ${fuelPercent <= 5 ? "text-red-300" : fuelPercent <= 15 ? "text-amber-300" : fuelPercent <= 25 ? "text-amber-300" : "text-zinc-200"}`}>
                   {Math.round(fuelPercent)}%
                 </span>
               </div>
@@ -278,28 +278,57 @@ export function Overview() {
         onClick={() => setDonate(true)}
         className="mx-auto text-xs text-zinc-500 transition hover:text-zinc-200 cursor-pointer pt-1"
       >
-        Help improve this app ✨
+        Support me ✨
       </button>
 
       <AnimatePresence>
         {donate ? (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 cursor-pointer"
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 cursor-pointer"
             onClick={() => setDonate(false)}
           >
-            <motion.img
-              src="/maybank-qr.jpg"
-              alt="Maybank QR, Muhammad Daniel Aniq Bin"
-              initial={{ scale: 0.96, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.96, opacity: 0 }}
-              className="max-h-[80vh] w-full max-w-sm rounded-[28px] object-contain"
-            />
-          </motion.button>
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Support Developer"
+              initial={{ scale: 0.94, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 16 }}
+              transition={{ type: "spring", stiffness: 420, damping: 32 }}
+              className="relative flex w-full max-w-sm flex-col items-center rounded-3xl border border-white/10 bg-[#121216]/95 p-5 text-center shadow-2xl backdrop-blur-2xl cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setDonate(false)}
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.06] text-zinc-400 hover:bg-white/[0.12] hover:text-white transition cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="w-full pr-6 text-left">
+                <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-zinc-400">Support Developer</p>
+                <h3 className="text-lg font-bold tracking-tight text-white mt-0.5">Maybank DuitNow QR</h3>
+              </div>
+
+              <p className="mt-3 text-xs sm:text-sm text-zinc-300 leading-relaxed text-left">
+                I&apos;m also a proton user who got tired of getting stuck with old and outdated user interface. Feel free to support me by donating. Any amount is appreciated.
+              </p>
+
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white p-2 shadow-inner">
+                <img
+                  src="/maybank-qr.jpg"
+                  alt="Maybank QR, Muhammad Daniel Aniq Bin"
+                  className="h-auto max-h-[44vh] w-full rounded-xl object-contain"
+                />
+              </div>
+
+              <p className="mt-3 text-[11px] font-medium text-zinc-400">
+                Muhammad Daniel Aniq Bin
+              </p>
+            </motion.div>
+          </div>
         ) : null}
       </AnimatePresence>
     </div>

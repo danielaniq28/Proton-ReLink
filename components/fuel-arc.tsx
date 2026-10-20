@@ -2,10 +2,20 @@
 
 import { motion } from "framer-motion";
 
-export function rangeTone(rangeKm: number) {
-  if (rangeKm <= 50) return { level: "low" as const, color: "#f2a3a0" };
-  if (rangeKm <= 100) return { level: "warn" as const, color: "#e6b15a" };
-  return { level: "ok" as const, color: "#f4f4f5" };
+export function rangeTone(rangeKm: number, fuelPercent?: number) {
+  if (fuelPercent != null) {
+    if (fuelPercent <= 5) {
+      return { level: "low" as const, color: "#ef4444", blinkDuration: 1.8 };
+    }
+    if (fuelPercent <= 15) {
+      return { level: "warn" as const, color: "#f59e0b", blinkDuration: 2.2 };
+    }
+    return { level: "ok" as const, color: "#f4f4f5", blinkDuration: 0 };
+  }
+
+  if (rangeKm <= 50) return { level: "low" as const, color: "#ef4444", blinkDuration: 1.8 };
+  if (rangeKm <= 100) return { level: "warn" as const, color: "#f59e0b", blinkDuration: 2.2 };
+  return { level: "ok" as const, color: "#f4f4f5", blinkDuration: 0 };
 }
 
 export function FuelArc({ percent, rangeKm = 999, className }: { percent: number; rangeKm?: number; className?: string }) {
@@ -14,7 +24,7 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
   const circumference = 2 * Math.PI * radius;
   const visible = circumference * 0.72;
   const targetOffset = visible * (1 - value / 100);
-  const tone = rangeTone(rangeKm);
+  const tone = rangeTone(rangeKm, value);
   const alerting = tone.level !== "ok";
 
   return (
@@ -43,15 +53,17 @@ export function FuelArc({ percent, rangeKm = 999, className }: { percent: number
         initial={{ strokeDashoffset: visible }}
         animate={{
           strokeDashoffset: targetOffset,
-          opacity: alerting ? [1, 0.35, 1] : 1,
+          stroke: tone.color,
+          opacity: alerting ? [1, 0.25, 1] : 1,
         }}
         transition={{
           strokeDashoffset: { duration: 1.1, ease: [0.16, 1, 0.3, 1] },
+          stroke: { duration: 0.4 },
           opacity: alerting
-            ? { duration: tone.level === "low" ? 0.9 : 1.5, repeat: Infinity, ease: "easeInOut" }
+            ? { duration: tone.blinkDuration, repeat: Infinity, ease: "easeInOut" }
             : { duration: 0.3 },
         }}
-        style={alerting ? { filter: `drop-shadow(0 0 6px ${tone.color})` } : undefined}
+        style={alerting ? { filter: `drop-shadow(0 0 8px ${tone.color})` } : undefined}
       />
     </svg>
   );
