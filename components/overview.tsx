@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, ChevronRight, Fan, Fuel, LocateFixed, SlidersHorizontal, X } from "lucide-react";
+import { Activity, Check, ChevronRight, Copy, Fan, Fuel, LocateFixed, SlidersHorizontal, X } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
@@ -25,6 +25,7 @@ export function Overview() {
   const { vehicle, telemetry, loading } = useVehicle();
   const { go } = useDashboardNav();
   const [donate, setDonate] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (loading || !vehicle || !telemetry) {
     return <div className="h-80 animate-pulse rounded-3xl bg-white/5" />;
@@ -320,13 +321,42 @@ export function Overview() {
                 <img
                   src="/maybank-qr.jpg"
                   alt="Maybank QR, Muhammad Daniel Aniq Bin"
-                  className="h-auto max-h-[44vh] w-full rounded-xl object-contain"
+                  className="h-auto max-h-[40vh] w-full rounded-xl object-contain"
                 />
               </div>
 
-              <p className="mt-3 text-[11px] font-medium text-zinc-400">
-                Muhammad Daniel Aniq Bin
-              </p>
+              {/* Bank Transfer Details Card */}
+              <div className="mt-3.5 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3 text-left">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[10px] font-semibold tracking-wider uppercase text-zinc-400">Manual Transfer</span>
+                  <span className="text-xs font-semibold text-amber-300">Maybank</span>
+                </div>
+                <div className="mt-1.5 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Account Number</p>
+                    <p className="font-mono text-sm font-semibold tracking-wider text-white select-all">
+                      1520-6907-4266
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== "undefined" && navigator.clipboard) {
+                        void navigator.clipboard.writeText("152069074266");
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }
+                    }}
+                    className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-zinc-200 transition hover:bg-white/[0.12] hover:text-white cursor-pointer active:scale-95 shadow-sm"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-zinc-300" />}
+                    <span>{copied ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
+                <div className="mt-2 pt-2 border-t border-white/[0.06] text-xs text-zinc-400">
+                  Account Name: <span className="text-white font-medium">Muhammad Daniel Aniq</span>
+                </div>
+              </div>
             </motion.div>
           </div>
         ) : null}
