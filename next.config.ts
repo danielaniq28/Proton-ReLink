@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  distDir: process.env.NODE_ENV === "production" ? ".next_prod" : ".next",
   output: "standalone",
   poweredByHeader: false,
   devIndicators: false,

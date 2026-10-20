@@ -79,7 +79,7 @@ export function LoginScreen() {
         <div className="w-full rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-md sm:p-10 shadow-2xl shadow-black/40">
           <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Sign In</h1>
           <p className="mt-2 mb-8 text-sm text-zinc-400">
-            Enter your Proton Connected Services credentials to access your dashboard.
+            Enter the credentials that you used to login to Proton Link or Atlas Auto.
           </p>
 
           <form onSubmit={submit} className="flex flex-col gap-6">
