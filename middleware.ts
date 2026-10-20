@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   if (pathname === "/login" && isSignout) {
     const response = NextResponse.next();
     response.cookies.delete(SESSION);
-    response.cookies.set(SESSION, "", { path: "/", maxAge: 0, sameSite: "lax" });
+    response.cookies.set(SESSION, "", { path: "/", maxAge: 0, sameSite: "none", secure: true });
     return response;
   }
 

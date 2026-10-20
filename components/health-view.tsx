@@ -26,6 +26,14 @@ export function HealthView() {
     { label: "Battery voltage", value: telemetry.batteryVoltage == null ? "—" : `${telemetry.batteryVoltage.toFixed(1)} V` },
     { label: "Odometer", value: `${formatNumber(telemetry.odometerKm)} km` },
     { label: "Distance to service", value: `${formatNumber(telemetry.serviceKm)} km` },
+    {
+      label: "4G TCU data (OpenAPI /flow)",
+      value:
+        telemetry.remainingDataGb != null
+          ? `${telemetry.remainingDataGb.toFixed(2)} / ${telemetry.totalDataGb ?? 2} GB (${telemetry.rawUsedFlow || (telemetry.usedDataGb != null && telemetry.usedDataGb < 0.01 ? `${Math.round(telemetry.usedDataGb * 1024)} MB` : `${(telemetry.usedDataGb ?? 0).toFixed(2)} GB`)} used)`
+          : "—",
+      dot: telemetry.remainingDataGb != null ? (telemetry.remainingDataGb < 0.25 ? "amber" : "green") : undefined,
+    },
     { label: "Telematics protocol", value: (telemetry.backend || vehicle.backend) === "atlas" ? "ACO Tech · ATLAS" : "ECARX · Legacy" },
   ];
 

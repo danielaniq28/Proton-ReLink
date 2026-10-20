@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: Params) {
     const payloads = await fetchStatusPayloads(session, vin, backend);
     const state = (await readMockState()) ?? {};
     const baseline = state[vin] ?? mockTelemetry(vehicle);
-    const telemetry = telemetryFromPayloads(vin, payloads.legacy, payloads.atlas, baseline, carType, backend);
+    const telemetry = telemetryFromPayloads(vin, payloads.legacy, payloads.atlas, baseline, carType, backend, payloads.flow);
     state[vin] = telemetry;
     await writeMockState(state);
     return NextResponse.json({ telemetry, fallback: false, warning: null });

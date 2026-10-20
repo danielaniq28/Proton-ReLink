@@ -18,6 +18,9 @@ export function LoginScreen() {
       if (params.get("error") === "no_vehicles") {
         setError("No vehicles found for your account. Please check your credentials or Proton app.");
       }
+      if (params.get("demo") === "1" || params.get("demo") === "true") {
+        void preview();
+      }
     }
   }, []);
 
@@ -141,18 +144,6 @@ export function LoginScreen() {
               <ArrowRight className="h-5 w-5" />
             </button>
           </form>
-
-          {/* Hidden demo trigger kept in DOM and process logic intact */}
-          <button
-            type="button"
-            onClick={preview}
-            disabled={pending != null}
-            className="hidden"
-            aria-hidden="true"
-            tabIndex={-1}
-          >
-            {pending === "demo" ? "Opening preview…" : "Explore simulated demo garage"}
-          </button>
         </div>
 
         <a

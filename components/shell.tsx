@@ -129,8 +129,8 @@ function MobileNav() {
   }
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom))] md:hidden">
-      <div className="w-full max-w-md overflow-hidden rounded-full">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom))] xl:hidden">
+      <div className="w-full max-w-md sm:max-w-lg overflow-hidden rounded-full">
         <div
           ref={trackRef}
           className="liquid-nav pointer-events-auto relative flex w-full items-stretch px-1.5 py-1.5"
@@ -214,7 +214,7 @@ function CommandStatusFloating() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.94 }}
           transition={{ type: "spring", stiffness: 450, damping: 30 }}
-          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm justify-center md:bottom-6 md:left-[clamp(4.75rem,8vw,6.5rem)] md:right-0"
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm justify-center xl:bottom-6 xl:left-[clamp(4.75rem,8vw,6.5rem)] xl:right-0"
         >
           <div
             onClick={() => setDismissed(true)}
@@ -295,8 +295,8 @@ function Frame() {
       </AnimatePresence>
 
       <div className="min-h-screen bg-[#08080a] text-zinc-100">
-        <div className="flex min-h-screen w-full flex-col md:flex-row">
-          <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-6 md:flex">
+        <div className="flex min-h-screen w-full flex-col xl:flex-row">
+          <aside className="sticky top-0 hidden h-screen w-[clamp(4.75rem,8vw,6.5rem)] shrink-0 flex-col items-center border-r border-white/5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-6 xl:flex">
             <img src="/da-mark.png" alt="Proton Re-Link" className="mb-10 h-auto w-[55%] max-w-[2.75rem] object-contain" />
             <nav className="flex w-full flex-1 flex-col items-center gap-2 px-1.5">
               {NAV.map((item) => {
@@ -352,7 +352,7 @@ function Frame() {
           </aside>
 
         <div className="flex min-w-0 flex-1 flex-col h-full min-h-0">
-          <header className="sticky top-0 z-30 shrink-0 border-b border-white/5 bg-[#08080a] px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-3 md:px-[clamp(1.25rem,3vw,2.5rem)] md:py-3.5">
+          <header className="sticky top-0 z-30 shrink-0 border-b border-white/5 bg-[#08080a] px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-3 md:px-6 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:py-3.5">
             <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {/* 1. Brand with 'Powered by' and da-mark.png */}
@@ -440,14 +440,14 @@ function Frame() {
           </header>
 
           {warning ? (
-            <div className="mx-auto w-full max-w-5xl px-4 sm:px-5 md:px-0">
+            <div className="mx-auto w-full max-w-5xl px-4 sm:px-5 xl:px-0">
               <p className="mt-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs sm:text-sm text-amber-200/90">
                 {warning}
               </p>
             </div>
           ) : null}
 
-          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-[clamp(1.25rem,3vw,2.5rem)] md:pt-6 md:pb-10">
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-6 md:pt-5 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:pt-6 xl:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               <DashboardPanels />
             </div>

@@ -72,6 +72,9 @@ export type Telemetry = {
   doorsOpen: { fl: boolean; fr: boolean; rl: boolean; rr: boolean };
   remainingDataGb?: number | null;
   usedDataGb?: number | null;
+  totalDataGb?: number | null;
+  rawResidueFlow?: string | null;
+  rawUsedFlow?: string | null;
   avgSpeedKmh?: number | null;
 };
 
@@ -107,4 +110,9 @@ export type ApiEnvelope = {
   data?: unknown;
   originData?: unknown;
   exceptionCode?: string;
+};
+
+export type FlowEntity = {
+  residueFlow?: string | null;
+  usedFlow?: string | null;
 };

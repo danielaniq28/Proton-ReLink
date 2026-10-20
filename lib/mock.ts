@@ -113,8 +113,8 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
       place: "Bukit Bintang, Kuala Lumpur",
       interiorTemp: 23,
       exteriorTemp: 32,
-      remainingDataGb: 0.85,
-      usedDataGb: 1.15,
+      remainingDataGb: 1.997,
+      usedDataGb: 0.003,
     },
     X50: {
       fuelPercent: 82,
@@ -183,6 +183,9 @@ export function mockTelemetry(vehicle: Vehicle): Telemetry {
     doorsOpen: { fl: false, fr: false, rl: false, rr: false },
     remainingDataGb: profile.remainingDataGb ?? 1.5,
     usedDataGb: profile.usedDataGb ?? 0.5,
+    totalDataGb: Math.round(((profile.remainingDataGb ?? 1.5) + (profile.usedDataGb ?? 0.5)) * 100) / 100,
+    rawResidueFlow: `${Math.round(((profile.remainingDataGb ?? 1.5) + (profile.usedDataGb ?? 0.5)) * 100) / 100}GB`,
+    rawUsedFlow: `${profile.usedDataGb ?? 0.5}GB`,
     avgSpeedKmh: 48,
   };
 }

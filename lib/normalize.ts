@@ -423,6 +423,69 @@ export function telemetryFromEcarx(
   return next;
 }
 
+export function parseFlowToGb(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || value < 0) return null;
+    if (value > 10_000_000) return value / (1024 * 1024 * 1024);
+    if (value > 10_000) return value / (1024 * 1024);
+    if (value > 50) return value / 1024;
+    return value;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === "--" || trimmed === "null") return null;
+
+    const gbMatch = trimmed.match(/^([0-9.]+)\s*g(?:b)?$/i);
+    if (gbMatch) return Number(gbMatch[1]);
+
+    const mbMatch = trimmed.match(/^([0-9.]+)\s*m(?:b)?$/i);
+    if (mbMatch) return Number(mbMatch[1]) / 1024;
+
+    const kbMatch = trimmed.match(/^([0-9.]+)\s*k(?:b)?$/i);
+    if (kbMatch) return Number(kbMatch[1]) / (1024 * 1024);
+
+    const bytesMatch = trimmed.match(/^([0-9.]+)\s*b(?:ytes)?$/i);
+    if (bytesMatch) return Number(bytesMatch[1]) / (1024 * 1024 * 1024);
+
+    const numVal = Number(trimmed);
+    if (Number.isFinite(numVal) && numVal >= 0) {
+      if (numVal > 10_000_000) return numVal / (1024 * 1024 * 1024);
+      if (numVal > 10_000) return numVal / (1024 * 1024);
+      if (numVal > 50) return numVal / 1024;
+      return numVal;
+    }
+  }
+  return null;
+}
+
+export function applyFlowData(telemetry: Telemetry, flowRaw: unknown): Telemetry {
+  const record = asRecord(flowRaw);
+  if (!record) return telemetry;
+
+  // OpenAPI schema FlowEntity: { residueFlow: string, usedFlow: string }
+  const rawResidue = str(record.residueFlow ?? record.remainingFlow ?? record.residue);
+  const rawUsed = str(record.usedFlow ?? record.used);
+
+  const parsedReportedMax = parseFlowToGb(rawResidue);
+  const parsedUsed = parseFlowToGb(rawUsed) ?? 0;
+
+  // In Proton Connected Services, the reported quota figure (residueFlow e.g. "2.00GB")
+  // represents the total allocated plan cap. The actual remaining data is this maximum
+  // minus the recorded consumption (usedFlow e.g. "3MB").
+  const maxQuotaGb = parsedReportedMax ?? telemetry.totalDataGb ?? 2.0;
+  const actualRemainingGb = Math.max(0, Math.round((maxQuotaGb - parsedUsed) * 10000) / 10000);
+
+  return {
+    ...telemetry,
+    totalDataGb: maxQuotaGb,
+    remainingDataGb: actualRemainingGb,
+    usedDataGb: parsedUsed,
+    rawResidueFlow: rawResidue || null,
+    rawUsedFlow: rawUsed || null,
+  };
+}
+
 export function telemetryFromPayloads(
   vin: string,
   legacy: unknown,
@@ -430,11 +493,18 @@ export function telemetryFromPayloads(
   fallback: Telemetry,
   carType = "",
   backend: "atlas" | "ecarx" = "atlas",
+  flow?: unknown,
 ): Telemetry {
+  let base: Telemetry;
   if (backend === "ecarx") {
-    return telemetryFromEcarx(vin, legacy, fallback, carType);
+    base = telemetryFromEcarx(vin, legacy, fallback, carType);
+  } else {
+    base = telemetryFromAtlas(vin, atlas, fallback, carType);
   }
-  return telemetryFromAtlas(vin, atlas, fallback, carType);
+  if (flow) {
+    base = applyFlowData(base, flow);
+  }
+  return base;
 }
 
 export function listFromEnvelope(payload: unknown): unknown[] {
@@ -445,5 +515,6 @@ export function listFromEnvelope(payload: unknown): unknown[] {
 
 export function objectFromEnvelope(payload: unknown): unknown {
   const record = asRecord(payload);
-  return record?.originData ?? record?.data ?? null;
+  if (!record) return null;
+  return record.originData ?? record.data ?? record;
 }

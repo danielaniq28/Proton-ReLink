@@ -37,14 +37,6 @@ export function Overview() {
       : Math.round(((telemetry.fuelPercent ?? 0) / 100) * maxTankLitres * 10) / 10;
   const fuelPercent = Math.max(0, Math.min(100, telemetry.fuelPercent ?? (currentFuelLitres / maxTankLitres) * 100));
 
-  const remainingDataGb =
-    telemetry.remainingDataGb ??
-    (vehicle.carType === "X90" ? 3.4 : vehicle.carType === "X70" ? 1.45 : vehicle.carType === "S70" ? 0.85 : 1.62);
-  const usedDataGb =
-    telemetry.usedDataGb ??
-    (vehicle.carType === "X90" ? 1.6 : vehicle.carType === "X70" ? 0.55 : vehicle.carType === "S70" ? 1.15 : 0.38);
-  const totalDataGb = Math.max(0.1, Math.round((remainingDataGb + usedDataGb) * 100) / 100);
-  const dataPercent = Math.max(0, Math.min(100, Math.round((remainingDataGb / totalDataGb) * 100)));
   const servicePercent = Math.max(8, Math.min(100, Math.round(((10000 - ((telemetry.serviceKm ?? 0) % 10000)) / 10000) * 100)));
 
   const modules = [
@@ -180,7 +172,7 @@ export function Overview() {
           </div>
         </div>
 
-        {/* Progress Bars: Service Schedule & Fuel Level */}
+        {/* Progress Bar: Service Schedule */}
         <div className="mt-4 pt-3 border-t border-white/[0.06] px-1 flex flex-col gap-3">
           {/* Next Service Scheduled */}
           <div>
@@ -194,30 +186,6 @@ export function Overview() {
                 animate={{ width: `${servicePercent}%` }}
                 transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
                 className="h-full rounded-full bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Internet Data Quota Bar */}
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Remaining Internet Data</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-white">
-                  {remainingDataGb.toFixed(2)} / {totalDataGb.toFixed(totalDataGb % 1 === 0 ? 0 : 1)} GB
-                </span>
-              </div>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-              <motion.div
-                initial={{ width: "0%" }}
-                animate={{ width: `${dataPercent}%` }}
-                transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
-                className={`h-full rounded-full transition-colors ${
-                  dataPercent <= 15 ? "bg-rose-400" : dataPercent <= 25 ? "bg-amber-400" : "bg-cyan-400"
-                }`}
               />
             </div>
           </div>

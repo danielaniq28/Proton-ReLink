@@ -150,7 +150,7 @@ export function PWAInstallPrompt() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 420, damping: 32 }}
-          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] inset-x-3 sm:inset-x-6 md:inset-x-auto md:right-8 md:bottom-8 z-40 max-w-lg md:w-[410px] pointer-events-auto"
+          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] inset-x-3 sm:inset-x-6 xl:inset-x-auto xl:right-8 xl:bottom-8 z-40 max-w-lg xl:w-[410px] pointer-events-auto"
         >
           <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#121216]/95 p-4 text-white shadow-2xl shadow-black/80 backdrop-blur-2xl">
             {/* Subtle top ambient glow */}

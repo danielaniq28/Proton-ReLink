@@ -116,7 +116,11 @@ async function callProton(
     headers.set("X-EQUIPMENT-TYPE", "proton link");
     headers.set("X-AGENT-VERSION", AGENT_VERSION);
     headers.set("Content-Type", "application/json");
-    headers.set("AUTHORIZATION", session?.accessToken ?? "");
+    if (session?.accessToken) {
+      headers.set("AUTHORIZATION", session.accessToken);
+      headers.set("Authorization", session.accessToken);
+      headers.set("token", session.accessToken);
+    }
   }
 
   let response: Response;
@@ -293,11 +297,40 @@ export async function fetchVehicles(session: Session): Promise<Vehicle[]> {
   return withArt;
 }
 
+export async function fetchVehicleFlow(
+  session: Session,
+  vin: string,
+): Promise<unknown> {
+  const query = new URLSearchParams({
+    userId: session.userId,
+    vin,
+  }).toString();
+
+  try {
+    const payload = await callProton(LEGACY, `/app/v1/vehicle/flow?${query}`, session);
+    const data = objectFromEnvelope(payload);
+    if (data && typeof data === "object") return data;
+  } catch {
+    /* Fallback to ATLAS */
+  }
+
+  try {
+    const payload = await callProton(ATLAS, `/app/v1/vehicle/flow?${query}`, session);
+    const data = objectFromEnvelope(payload);
+    if (data && typeof data === "object") return data;
+  } catch {
+    /* Flow endpoint unavailable */
+  }
+
+  return null;
+}
+
 export async function fetchStatusPayloads(
   session: Session,
   vin: string,
   backend: TelemetryBackend = "atlas",
-): Promise<{ legacy: unknown; atlas: unknown }> {
+): Promise<{ legacy: unknown; atlas: unknown; flow: unknown }> {
+  const flowPromise = fetchVehicleFlow(session, vin);
   if (backend === "ecarx") {
     const legacy = await callProton(
       LEGACY,
@@ -309,14 +342,16 @@ export async function fetchStatusPayloads(
       }).toString()}`,
       session,
     );
-    return { legacy: objectFromEnvelope(legacy), atlas: null };
+    const flow = await flowPromise;
+    return { legacy: objectFromEnvelope(legacy), atlas: null, flow };
   }
 
   const atlas = await callProton(ATLAS, "/iot/function/getVehicleStatus", session, {
     method: "POST",
     body: JSON.stringify({ vin }),
   });
-  return { legacy: null, atlas: objectFromEnvelope(atlas) };
+  const flow = await flowPromise;
+  return { legacy: null, atlas: objectFromEnvelope(atlas), flow };
 }
 
 export async function sendCommand(

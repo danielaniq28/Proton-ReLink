@@ -6,8 +6,8 @@ export const MOCK_COOKIE = "pl_mock";
 
 const base = {
   httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production" || process.env.VERCEL === "1",
+  sameSite: "none" as const,
+  secure: true,
   path: "/",
   maxAge: 60 * 60 * 24 * 30, // 30 days
 };
