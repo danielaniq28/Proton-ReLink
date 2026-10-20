@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ControlAction, Telemetry, Vehicle } from "@/lib/types";
 import { applyMockCommand, clampClimateMinutes } from "@/lib/mock";
+import { performAutoRelogin } from "@/lib/local-store";
 
 const BROADCAST_NAME = "proton_vehicle_channel";
 
@@ -154,6 +155,21 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     };
   }, [vehicle]);
 
+  const isReauthenticating = useRef(false);
+
+  const handleSessionExpired = useCallback(async (): Promise<boolean> => {
+    if (isReauthenticating.current) return false;
+    isReauthenticating.current = true;
+    try {
+      const ok = await performAutoRelogin();
+      return ok;
+    } catch {
+      return false;
+    } finally {
+      isReauthenticating.current = false;
+    }
+  }, []);
+
   const loadStatus = useCallback(async (vin: string, carType?: string, backend?: string) => {
     const generation = ++statusGeneration.current;
     const params = new URLSearchParams();
@@ -164,7 +180,11 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(`/api/vehicles/${encodeURIComponent(vin)}/status${query}`, { cache: "no-store" });
       if (generation !== statusGeneration.current) return;
       if (response.status === 401) {
-        window.location.href = "/login";
+        const refreshed = await handleSessionExpired();
+        if (refreshed) {
+          return loadStatus(vin, carType, backend);
+        }
+        window.location.href = "/login?session_expired=1";
         return;
       }
       if (!response.ok) return;
@@ -188,16 +208,20 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* Suppress transient network poll failures */
     }
-  }, []);
+  }, [demo, handleSessionExpired]);
 
   const loadGarage = useCallback(async () => {
     try {
       const response = await fetch("/api/vehicles", { cache: "no-store" });
       if (response.status === 401) {
+        const refreshed = await handleSessionExpired();
+        if (refreshed) {
+          return loadGarage();
+        }
         try {
           window.localStorage.removeItem(STATUS_CACHE);
         } catch {}
-        window.location.href = "/login?signout=1";
+        window.location.href = "/login?session_expired=1";
         return;
       }
       if (!response.ok) {

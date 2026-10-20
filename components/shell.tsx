@@ -10,6 +10,7 @@ import { VehicleProvider, useVehicle } from "./vehicle-provider";
 import { VehicleBanner } from "./vehicle-banner";
 import { SignOutSplash } from "./signout-splash";
 import { PWAInstallPrompt } from "./pwa-install-prompt";
+import { clearStoredCredentials } from "@/lib/local-store";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: Gauge },
@@ -278,6 +279,9 @@ function Frame() {
     try {
       try {
         window.localStorage.removeItem("pl_last_status");
+      } catch {}
+      try {
+        await clearStoredCredentials();
       } catch {}
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {

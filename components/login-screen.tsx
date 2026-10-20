@@ -2,27 +2,68 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, EyeOff, Lock, Phone } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2, Lock, Phone } from "lucide-react";
+import {
+  clearStoredCredentials,
+  getStoredCredentials,
+  performAutoRelogin,
+  saveStoredCredentials,
+} from "@/lib/local-store";
 
 export function LoginScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"login" | "demo" | null>(null);
+  const [autoConnecting, setAutoConnecting] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("error") === "no_vehicles") {
-        setError("No vehicles found for your account. Please check your credentials or Proton app.");
-      }
-      if (params.get("demo") === "1" || params.get("demo") === "true") {
-        void preview();
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const isExplicitSignout = params.get("signout") === "1";
+    const errorParam = params.get("error");
+
+    if (errorParam === "no_vehicles") {
+      setError("No vehicles found for your account. Please check your credentials or Proton app.");
+    }
+    if (params.get("session_expired") === "1") {
+      setError("Your session expired. Auto-reconnecting…");
+    }
+
+    if (isExplicitSignout) {
+      void clearStoredCredentials();
+      return;
+    }
+
+    let active = true;
+    async function checkAutoLogin() {
+      try {
+        const stored = await getStoredCredentials();
+        if (!active || !stored?.phone || !stored?.password) return;
+
+        setPhone(stored.phone);
+        setAutoConnecting(true);
+        const success = await performAutoRelogin();
+        if (!active) return;
+
+        if (success) {
+          router.replace("/connecting");
+        } else {
+          setAutoConnecting(false);
+        }
+      } catch {
+        if (active) setAutoConnecting(false);
       }
     }
-  }, []);
+
+    void checkAutoLogin();
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   function enter() {
     router.replace("/connecting");
@@ -40,6 +81,13 @@ export function LoginScreen() {
       });
       const data = (await response.json()) as { message?: string };
       if (!response.ok) throw new Error(data.message || "Login failed");
+
+      if (remember) {
+        await saveStoredCredentials(phone, password);
+      } else {
+        await clearStoredCredentials();
+      }
+
       enter();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -128,6 +176,34 @@ export function LoginScreen() {
                 </button>
               </div>
             </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none text-xs text-zinc-400 hover:text-zinc-200 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 bg-white/5 accent-white cursor-pointer"
+                />
+                <span>Remember on this device (auto-relogin on expiry)</span>
+              </label>
+            </div>
+
+            {autoConnecting ? (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-xs text-zinc-300">
+                <div className="flex items-center gap-2.5">
+                  <Loader2 className="h-4 w-4 animate-spin text-white shrink-0" />
+                  <span>Auto-reconnecting to Proton…</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAutoConnecting(false)}
+                  className="text-[11px] text-zinc-400 hover:text-white underline cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : null}
 
             {error ? (
               <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
