@@ -129,7 +129,7 @@ function MobileNav() {
   }
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(0.7rem,env(safe-area-inset-bottom))] xl:hidden">
+    <nav className="liquid-nav-dock px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] xl:hidden">
       <div className="w-full max-w-md sm:max-w-lg overflow-hidden rounded-full">
         <div
           ref={trackRef}
@@ -454,11 +454,11 @@ function Frame() {
           </div>
         </div>
       </div>
+    </div>
 
       <CommandStatusFloating />
       <PWAInstallPrompt />
       <MobileNav />
-    </div>
     </LayoutGroup>
   );
 }
