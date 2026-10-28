@@ -218,7 +218,7 @@ export function Overview() {
           {/* Next Service Scheduled */}
           <div>
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Next Service Scheduled</span>
+              <span className="text-[11px] font-medium tracking-wide uppercase text-zinc-400">Next Service Scheduled In</span>
               <span className="text-xs font-semibold text-white">{formatNumber(telemetry.serviceKm)} km</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
