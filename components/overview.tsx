@@ -233,12 +233,11 @@ export function Overview() {
         </div>
       </section>
 
-      {/* Siri Voice Shortcuts Banner */}
+      {/* Siri Voice Shortcuts Banner (hidden until feature is ready) */}
       <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.05 }}
-        className="relative overflow-hidden rounded-[26px] border border-purple-500/25 bg-gradient-to-r from-purple-950/30 via-[#121019] to-cyan-950/20 p-4 sm:p-5 shadow-lg shadow-purple-950/20 backdrop-blur-xl"
+        initial={false}
+        style={{ display: "none" }}
+        className="hidden relative overflow-hidden rounded-[26px] border border-purple-500/25 bg-gradient-to-r from-purple-950/30 via-[#121019] to-cyan-950/20 p-4 sm:p-5 shadow-lg shadow-purple-950/20 backdrop-blur-xl"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
           <div className="flex items-start gap-3.5">
@@ -396,9 +395,11 @@ export function Overview() {
       <button
         type="button"
         onClick={() => setDonate(true)}
-        className="mx-auto text-xs text-zinc-500 transition hover:text-zinc-200 cursor-pointer pt-1"
+        className="group relative z-20 mx-auto mt-2 mb-10 sm:mb-12 xl:mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs font-medium backdrop-blur-sm shadow-sm transition-all hover:border-white/20 hover:bg-white/[0.06] active:scale-95 cursor-pointer"
       >
-        Support me ✨
+        <span className="shimmer-text font-medium tracking-wide">
+          Support me ✨
+        </span>
       </button>
 
       <AnimatePresence>

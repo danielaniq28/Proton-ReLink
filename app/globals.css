@@ -104,3 +104,31 @@ input {
     inset 0 -1px 0 rgba(255, 255, 255, 0.06),
     0 10px 28px rgba(0, 0, 0, 0.28);
 }
+
+@keyframes text-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #a1a1aa 0%,
+    #ffffff 25%,
+    #e4e4e7 50%,
+    #ffffff 75%,
+    #a1a1aa 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  animation: text-shimmer 2.6s ease-in-out infinite;
+}
+
