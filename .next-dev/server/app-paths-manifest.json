@@ -1,0 +1,5 @@
+{
+  "/api/vehicles/[vin]/status/route": "app/api/vehicles/[vin]/status/route.js",
+  "/api/shortcuts/token/route": "app/api/shortcuts/token/route.js",
+  "/api/shortcuts/route": "app/api/shortcuts/route.js"
+}

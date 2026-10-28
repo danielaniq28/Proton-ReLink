@@ -20,5 +20,28 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    shortcuts: [
+      {
+        name: "Lock Doors",
+        short_name: "Lock",
+        description: "Lock all doors",
+        url: "/dashboard/controls?action=lock",
+        icons: [{ src: "/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Unlock Doors",
+        short_name: "Unlock",
+        description: "Unlock all doors",
+        url: "/dashboard/controls?action=unlock",
+        icons: [{ src: "/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Start Engine & A/C",
+        short_name: "Start Car",
+        description: "Start engine & pre-cool cabin",
+        url: "/dashboard/controls?action=engine_start",
+        icons: [{ src: "/icon-192.png", sizes: "192x192" }],
+      },
+    ],
   };
 }

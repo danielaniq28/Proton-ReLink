@@ -1,0 +1,19 @@
+{
+  "pages": {
+    "/api/vehicles/[vin]/status/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/vehicles/[vin]/status/route.js"
+    ],
+    "/api/shortcuts/token/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/shortcuts/token/route.js"
+    ],
+    "/api/shortcuts/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/shortcuts/route.js"
+    ]
+  }
+}

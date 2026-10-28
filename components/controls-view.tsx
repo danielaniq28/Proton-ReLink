@@ -237,7 +237,7 @@ export function ControlsView() {
       {/* Window Opening Mode Prompt / Modal */}
       <AnimatePresence>
         {showWindowPrompt && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -257,7 +257,7 @@ export function ControlsView() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
-              className="relative z-10 w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] border border-white/[0.12] bg-[#121316] p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
+              className="relative z-10 w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] border border-white/[0.12] bg-[#121316] p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] sm:p-6 shadow-2xl backdrop-blur-2xl"
             >
               {/* Sheet handle on mobile */}
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20 sm:hidden" />
@@ -353,7 +353,7 @@ export function ControlsView() {
       {/* Critical Action Confirmation Prompt / Modal */}
       <AnimatePresence>
         {confirmPrompt && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -373,7 +373,7 @@ export function ControlsView() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
-              className="relative z-10 w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] border border-white/[0.12] bg-[#121316] p-5 sm:p-6 shadow-2xl backdrop-blur-2xl"
+              className="relative z-10 w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] border border-white/[0.12] bg-[#121316] p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] sm:p-6 shadow-2xl backdrop-blur-2xl"
             >
               {/* Sheet handle on mobile */}
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20 sm:hidden" />

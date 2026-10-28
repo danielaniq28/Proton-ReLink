@@ -1,21 +1,25 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const nextConfig: NextConfig = {
-  output: "standalone",
-  poweredByHeader: false,
-  devIndicators: false,
-  images: { unoptimized: true },
-  async headers() {
-    return [
-      {
-        source: "/sw.js",
-        headers: [
-          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
-          { key: "Service-Worker-Allowed", value: "/" },
-        ],
-      },
-    ];
-  },
-};
+export default function nextConfig(phase: string): NextConfig {
+  const isDev = phase === PHASE_DEVELOPMENT_SERVER;
 
-export default nextConfig;
+  return {
+    distDir: isDev ? ".next-dev" : ".next",
+    output: "standalone",
+    poweredByHeader: false,
+    devIndicators: false,
+    images: { unoptimized: true },
+    async headers() {
+      return [
+        {
+          source: "/sw.js",
+          headers: [
+            { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+            { key: "Service-Worker-Allowed", value: "/" },
+          ],
+        },
+      ];
+    },
+  };
+}
