@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, Check, ChevronRight, Copy, Fan, Fuel, LocateFixed, SlidersHorizontal, X } from "lucide-react";
+import { Activity, Check, ChevronRight, Copy, Fan, Fuel, LocateFixed, Lock, Power, SlidersHorizontal, Unlock, X } from "lucide-react";
 import { CarGraphic } from "./car-graphic";
 import { useDashboardNav } from "./dashboard-nav";
 import { FuelArc, rangeTone } from "./fuel-arc";
@@ -165,8 +165,45 @@ export function Overview() {
           </div>
         </div>
 
-        {/* Average Speed */}
-        <div className="mt-1.5 flex items-center justify-center text-xs">
+        {/* Status Pills: Door Lock, Engine Status, Avg Speed */}
+        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-2 text-xs">
+          {/* Door Lock Status */}
+          <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                telemetry.locked
+                  ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+                  : "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.5)] animate-pulse"
+              }`}
+            />
+            {telemetry.locked ? (
+              <Lock className="h-3 w-3 text-emerald-400 shrink-0" />
+            ) : (
+              <Unlock className="h-3 w-3 text-amber-400 shrink-0" />
+            )}
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Doors</span>
+            <span className="font-semibold text-white">
+              {telemetry.locked ? "Locked" : "Unlocked"}
+            </span>
+          </div>
+
+          {/* Engine Status */}
+          <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                telemetry.engineOn
+                  ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)] animate-pulse"
+                  : "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.4)]"
+              }`}
+            />
+            <Power className={`h-3 w-3 shrink-0 ${telemetry.engineOn ? "text-amber-400" : "text-zinc-400"}`} />
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Engine</span>
+            <span className={`font-semibold ${telemetry.engineOn ? "text-amber-400" : "text-white"}`}>
+              {telemetry.engineOn ? "Running" : "Off"}
+            </span>
+          </div>
+
+          {/* Average Speed */}
           <div className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
             <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Avg Speed</span>
             <span className="font-semibold text-white">{telemetry.avgSpeedKmh ?? 48} km/h</span>

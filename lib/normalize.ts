@@ -37,7 +37,15 @@ function flagOn(value: unknown): boolean | null {
 }
 
 function pickImage(record: Record<string, unknown>): string | null {
-  const direct = str(record.imageUrl) || str(record.vehicleModelUrl) || str(record.carResourcePath);
+  const direct =
+    str(record.imageUrl) ||
+    str(record.vehicleModelUrl) ||
+    str(record.pictureUrl) ||
+    str(record.carResourcePath) ||
+    str(record.modelPictureUrl) ||
+    str(record.coverImageUrl) ||
+    str(record.carPicture) ||
+    str(record.avatarUrl);
   return direct || null;
 }
 
@@ -124,8 +132,12 @@ export function vehicleFromAtlas(raw: unknown): Vehicle | null {
     modelName,
     seriesName: modelName,
     matName,
-    matCode: str(record.matCode),
-    bodyColorCode: str(record.bodyColorCode),
+    matCode: str(record.matCode) || str(record.seriesCode) || str(record.modelCode),
+    bodyColorCode:
+      str(record.bodyColorCode) ||
+      str(record.colorCode) ||
+      str(record.userColorCode) ||
+      str(record.exteriorColorCode),
     topColorCode: str(record.topColorCode),
     vehicleName: vehicleName || modelName,
     plate: extractPlate(record),

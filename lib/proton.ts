@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "crypto";
 import { listFromEnvelope, objectFromEnvelope, vehicleFromAtlas, vehicleFromLegacy } from "./normalize";
 import { clampClimateMinutes } from "./mock";
+import { getDefaultCarImage } from "./vehicle-art";
 import type { ApiEnvelope, ControlAction, LoginEntity, Session, TelemetryBackend, Vehicle } from "./types";
 
 const LEGACY = process.env.PROTON_LEGACY_BASE ?? "https://app.acotech.my:8443";
@@ -221,6 +222,44 @@ async function atlasVehicles(session: Session): Promise<Vehicle[]> {
 
 async function graphicFor(session: Session, vehicle: Vehicle): Promise<string | null> {
   if (vehicle.imageUrl) return vehicle.imageUrl;
+
+  // 1. Try ATLAS 45-degree isometric car picture (standard in Proton Link)
+  try {
+    const payload = await callProton(ATLAS, "/basic/model/bodyCode/queryFortyFiveColorPicture", session, {
+      method: "POST",
+      body: JSON.stringify({
+        modelCode: vehicle.modelCode || vehicle.carType,
+        bodyColorCode: vehicle.bodyColorCode || "",
+        topColorCode: vehicle.topColorCode || null,
+        matCode: vehicle.matCode || "",
+        vin: vehicle.vin,
+      }),
+    });
+    const data = objectFromEnvelope(payload) as { url?: string; md5?: string } | null;
+    if (data?.url) return data.url;
+  } catch {
+    /* forty-five degree picture optional */
+  }
+
+  // 2. Try ATLAS body picture list
+  try {
+    const payload = await callProton(ATLAS, "/basic/mat/model/bodyPictureList", session, {
+      method: "POST",
+      body: JSON.stringify({
+        matCode: vehicle.matCode || vehicle.modelCode || vehicle.carType,
+        modelCode: vehicle.modelCode || vehicle.carType,
+        bodyColorCode: vehicle.bodyColorCode || "",
+        topColorCode: vehicle.topColorCode || null,
+      }),
+    });
+    const data = objectFromEnvelope(payload) as { fileUrls?: Array<{ url?: string }> } | null;
+    const url = data?.fileUrls?.find((file) => file.url)?.url;
+    if (url) return url;
+  } catch {
+    /* factory render is optional */
+  }
+
+  // 3. Try LEGACY model image
   try {
     const query = new URLSearchParams({ vin: vehicle.vin, isPage: "false" });
     const pics = await callProton(LEGACY, `/app/v1/vehicle/modelImage?${query.toString()}`, session);
@@ -233,24 +272,11 @@ async function graphicFor(session: Session, vehicle: Vehicle): Promise<string | 
   } catch {
     /* picture catalog is optional */
   }
-  if (vehicle.matCode && vehicle.modelCode && vehicle.bodyColorCode) {
-    try {
-      const payload = await callProton(ATLAS, "/basic/mat/model/bodyPictureList", session, {
-        method: "POST",
-        body: JSON.stringify({
-          matCode: vehicle.matCode,
-          modelCode: vehicle.modelCode,
-          bodyColorCode: vehicle.bodyColorCode,
-          topColorCode: vehicle.topColorCode || null,
-        }),
-      });
-      const data = objectFromEnvelope(payload) as { fileUrls?: Array<{ url?: string }> } | null;
-      const url = data?.fileUrls?.find((file) => file.url)?.url;
-      if (url) return url;
-    } catch {
-      /* factory render is optional */
-    }
-  }
+
+  // 4. Fall back to curated authentic image for the specific model and color
+  const fallback = getDefaultCarImage(vehicle.carType, vehicle.colorName);
+  if (fallback) return fallback;
+
   return null;
 }
 

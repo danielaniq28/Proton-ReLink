@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getDefaultCarImage, sanitizeCarImageUrl } from "@/lib/vehicle-art";
 
 type Props = {
   carType: string;
@@ -12,14 +13,35 @@ type Props = {
 
 export function CarGraphic({ carType, imageUrl, className, colorName }: Props) {
   const [imageError, setImageError] = useState(false);
+  const [fallbackError, setFallbackError] = useState(false);
 
-  if (imageUrl && !imageError) {
+  useEffect(() => {
+    setImageError(false);
+    setFallbackError(false);
+  }, [imageUrl, carType, colorName]);
+
+  const sanitized = sanitizeCarImageUrl(imageUrl);
+  const curatedFallback = getDefaultCarImage(carType, colorName);
+  const activeImage =
+    !imageError && sanitized
+      ? sanitized
+      : !fallbackError && curatedFallback
+      ? curatedFallback
+      : null;
+
+  if (activeImage) {
     return (
       <div className="relative flex w-full items-center justify-center">
         <img
-          src={imageUrl}
+          src={activeImage}
           alt={`${carType} vehicle`}
-          onError={() => setImageError(true)}
+          onError={() => {
+            if (activeImage === sanitized) {
+              setImageError(true);
+            } else {
+              setFallbackError(true);
+            }
+          }}
           className={`mx-auto max-h-[280px] w-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] ${className ?? ""}`}
         />
       </div>
@@ -34,11 +56,30 @@ export function CarGraphic({ carType, imageUrl, className, colorName }: Props) {
     typeUpper.includes("SEDAN");
   const isS70 = typeUpper.includes("S70");
   const isX50 = typeUpper.includes("X50");
-  const isWhite = colorName?.toLowerCase().includes("white");
+  const colorLower = (colorName || "").toLowerCase();
+  const isWhite = colorLower.includes("white");
+  const isSilver = colorLower.includes("silver");
+  const isGrey = colorLower.includes("grey") || colorLower.includes("gray");
+  const isRed = colorLower.includes("red");
+  const isGreen = colorLower.includes("green") || colorLower.includes("teal");
+  const isBrown = colorLower.includes("brown");
+  const isBlack = colorLower.includes("black");
 
-  // Colors tailored to Proton models (S70 Marine Blue as seen in reference screenshot)
+  // Colors tailored to Proton models (Armour Silver, Marine Blue, Jet Grey, Ruby Red, etc.)
   const primaryPaint = isWhite
     ? { start: "#ffffff", mid: "#e4e4e7", end: "#a1a1aa", highlight: "#ffffff" }
+    : isSilver
+    ? { start: "#f1f5f9", mid: "#cbd5e1", end: "#64748b", highlight: "#ffffff" }
+    : isGrey
+    ? { start: "#94a3b8", mid: "#475569", end: "#1e293b", highlight: "#cbd5e1" }
+    : isRed
+    ? { start: "#ef4444", mid: "#dc2626", end: "#7f1d1d", highlight: "#f87171" }
+    : isGreen
+    ? { start: "#14b8a6", mid: "#0f766e", end: "#134e4a", highlight: "#2dd4bf" }
+    : isBrown
+    ? { start: "#b45309", mid: "#78350f", end: "#451a03", highlight: "#d97706" }
+    : isBlack
+    ? { start: "#3f3f46", mid: "#18181b", end: "#09090b", highlight: "#71717a" }
     : isS70
     ? { start: "#2563eb", mid: "#1d4ed8", end: "#1e3a8a", highlight: "#60a5fa" }
     : isX50
