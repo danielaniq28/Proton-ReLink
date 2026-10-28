@@ -136,14 +136,14 @@ input {
   animation: text-shimmer 2.6s ease-in-out infinite;
 }
 
-/* iOS WebApp Safe Area Utilities for Dynamic Island, notch & status bar */
+/* Standard header padding for normal mobile browser, tablet, and PC */
 .safe-top-header {
-  padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.75rem), 3.25rem);
+  padding-top: 0.75rem;
 }
 
 @media (min-width: 640px) {
   .safe-top-header {
-    padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.75rem), 2rem);
+    padding-top: 0.875rem;
   }
 }
 
@@ -153,15 +153,25 @@ input {
   }
 }
 
+/* Apply top safe area ONLY when running in standalone iOS (PWA / Add to Home Screen) */
 @media all and (display-mode: standalone) {
-  .safe-top-header {
-    padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.85rem), 3.5rem);
-  }
-  @media (min-width: 1280px) {
+  @supports (-webkit-touch-callout: none) {
     .safe-top-header {
-      padding-top: 0.875rem;
+      padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.65rem), 3.25rem);
+    }
+    .safe-top-screen {
+      padding-top: max(calc(env(safe-area-inset-top, 0px) + 1.5rem), 3.5rem) !important;
     }
   }
 }
+
+html.standalone-ios .safe-top-header {
+  padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.65rem), 3.25rem);
+}
+
+html.standalone-ios .safe-top-screen {
+  padding-top: max(calc(env(safe-area-inset-top, 0px) + 1.5rem), 3.5rem) !important;
+}
+
 
 
