@@ -356,7 +356,7 @@ function Frame() {
           </aside>
 
         <div className="flex min-w-0 flex-1 flex-col h-full min-h-0">
-          <header className="sticky top-0 z-30 shrink-0 border-b border-white/5 bg-[#08080a] px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-3 md:px-6 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:py-3.5">
+          <header className="safe-top-header sticky top-0 z-30 shrink-0 border-b border-white/5 bg-[#08080a]/95 backdrop-blur-xl px-4 pb-2.5 sm:px-5 sm:pb-3 md:px-6 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:pb-3.5">
             <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {/* 1. Brand with 'Powered by' and da-mark.png */}
@@ -451,7 +451,7 @@ function Frame() {
             </div>
           ) : null}
 
-          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:px-6 md:pt-5 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:pt-6 xl:pb-10">
+          <div className="flex-1 flex flex-col min-h-0 px-3.5 sm:px-5 pt-3 pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:px-6 md:pt-5 xl:px-[clamp(1.25rem,3vw,2.5rem)] xl:pt-6 xl:pb-10">
             <div className="mx-auto w-full max-w-5xl flex-1 flex flex-col min-h-0">
               <DashboardPanels />
             </div>
